@@ -1,17 +1,17 @@
-import { Network } from './networks';
+import { NetworkType } from './networkType';
 
-const searchKeyByValue: Record<Network, string> = {
-  [Network.delphinet]: 'https://you.better-call.dev/v1/bigmap/delphinet',
-  [Network.mainnet]: 'https://you.better-call.dev/v1/bigmap/mainnet',
+const searchKeyByValue: Record<NetworkType, string> = {
+  [NetworkType.delphinet]: 'https://you.better-call.dev/v1/bigmap/delphinet',
+  [NetworkType.mainnet]: 'https://you.better-call.dev/v1/bigmap/mainnet',
   // TODO add URL for localhost
-  [Network.localhost]: 'not available',
+  [NetworkType.localhost]: 'not available',
 };
 
-const contractHistory: Record<Network, string> = {
-  [Network.delphinet]: 'https://api.better-call.dev/v1/contract/delphinet',
-  [Network.mainnet]: 'https://api.better-call.dev/v1/contract/mainnet',
+const contractHistory: Record<NetworkType, string> = {
+  [NetworkType.delphinet]: 'https://api.better-call.dev/v1/contract/delphinet',
+  [NetworkType.mainnet]: 'https://api.better-call.dev/v1/contract/mainnet',
   // TODO add URL for localhost
-  [Network.localhost]: 'not available',
+  [NetworkType.localhost]: 'not available',
 };
 
 export const IndexerUrl = {

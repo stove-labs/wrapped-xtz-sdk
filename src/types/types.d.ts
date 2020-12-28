@@ -1,7 +1,7 @@
 import { TezosToolkit } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 
-import { Network } from '../constants/indexer';
+import { NetworkType } from '../constants/indexer';
 
 declare type address = string;
 declare type ovenOwner = address;
@@ -15,7 +15,7 @@ declare type checksum = string;
 
 declare type contractDeployment = {
   checksum: checksum;
-  address: address;
+  address?: address;
 };
 
 // TODO check if bigNumber is really not accepted by taquito as send parameter
@@ -26,12 +26,13 @@ declare type TezosBalance = BigNumber;
 declare type contractDeployments = {
   core: contractDeployment;
   oven: contractDeployment;
-  tokenContract: contractDeployment;
+  token: contractDeployment;
 };
 
 declare type deployments = {
   mainnet: contractDeployments;
   delphinet: contractDeployments;
+  localhost: contractDeployments;
 };
 
 declare type arbitraryValueKey = string;
@@ -43,9 +44,13 @@ declare type packedArbitraryValue = bytes;
 declare type lambdaParameter = bytes;
 declare type michelsonType = string;
 
+/**
+ * Default behavior is to check integrity.
+ */
 declare type wXTZConfig = {
   tezos: TezosToolkit;
-  network: Network;
+  network: NetworkType;
+  checkIntegrity?: boolean;
 };
 
 declare type coreContractStorage = {
@@ -83,5 +88,14 @@ declare type IndexerUrl = {
   };
   contractHistory: {
     delphinet: string;
+  };
+};
+
+declare type micheline = string;
+declare type contractInfoFromRpc = {
+  balance: number;
+  script: {
+    code: micheline;
+    storage: any;
   };
 };

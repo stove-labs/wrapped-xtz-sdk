@@ -1,4 +1,4 @@
-export enum Network {
+export enum NetworkType {
   mainnet = 'mainnet',
   delphinet = 'delphinet',
   localhost = 'localhost',
