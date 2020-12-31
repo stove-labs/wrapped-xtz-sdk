@@ -3,7 +3,7 @@ import { ContractMethod, ContractProvider, TezosToolkit } from '@taquito/taquito
 import { TransactionOperation } from '@taquito/taquito/dist/types/operations/transaction-operation';
 import test from 'ava';
 
-import { NetworkType } from '../constants/networkType';
+import { NetworkType } from '../constants/networkTypes';
 import testConfig from '../test/config';
 import { TezosBalance, wXTZConfig } from '../types/types';
 
@@ -26,14 +26,11 @@ test.before('set rpc', async function (t) {
 
 test.todo('can instantiate class');
 
-test('it can get core address', async function (t) {
-  const wxtz = new WXTZ(testConfig.core, wXTZConfig);
-  t.is(wxtz.coreAddress, testConfig.core);
-});
-
 test.only('it initializes with correct contract', async function (t) {
   const wxtz = new WXTZ(testConfig.core, wXTZConfig);
+
   await wxtz.initialize();
+
   t.is(wxtz.instance.address, testConfig.core);
 });
 
@@ -55,20 +52,25 @@ test('checksum check can be deactivated at initialization', async function (t) {
   const wXTZConfigWithoutCheck = wXTZConfig;
   wXTZConfigWithoutCheck.checkIntegrity = false;
   const wxtz = new WXTZ(notCoreContractAddress, wXTZConfigWithoutCheck);
+
   await wxtz.initialize();
+
   t.is(wxtz.instance.address, notCoreContractAddress);
 });
 
 test('it initializes and returns class', async function (t) {
   const wxtz = new WXTZ(testConfig.core, wXTZConfig);
+
   const wxtzObject: WXTZ = await wxtz.initialize();
+
   t.is(wxtz, wxtzObject);
 });
 
 test('it gets token contract address', async function (t) {
-  const wxtz = new WXTZ(testConfig.core, wXTZConfig);
-  await wxtz.initialize();
+  const wxtz = await initWxtz();
+
   const tokenContractAddress = await wxtz.getWXTZTokenContractAddress();
+
   t.is(tokenContractAddress, testConfig.token);
 });
 
@@ -76,17 +78,19 @@ test('it gets token contract address', async function (t) {
 // running serially because otherwise there would be a counter error for the transactions
 // counter error = 2 transactions use the same counter
 test.serial.skip('it can create an oven with delegate', async function (t) {
-  const wxtz = new WXTZ(testConfig.core, wXTZConfig);
-  await wxtz.initialize();
+  // Arrange
+  const wxtz = await initWxtz();
+
+  // Act
   const contractMethod: ContractMethod<ContractProvider> = await wxtz.createOven(
     testConfig.ovenOwner.pkh,
     testConfig.delegate
   );
-
   const operation: TransactionOperation = await contractMethod.send({ mutez: true, amount: testConfig.amount });
   await operation.confirmation(1);
 
   // TODO avoid casting to any
+  // Assert
   const internalOperations = (operation as any).results[0].metadata.internal_operation_results;
   const firstInternalOperation = internalOperations[0];
   t.is(firstInternalOperation.kind, 'origination');
@@ -104,13 +108,16 @@ test.serial.skip('it can create an oven with delegate', async function (t) {
 // running serially because otherwise there would be a counter error for the transactions
 // counter error = 2 transactions use the same counter
 test.serial.skip('it can create oven without delegate', async function (t) {
-  const wxtz = new WXTZ(testConfig.core, wXTZConfig);
-  await wxtz.initialize();
-  const contractMethod: ContractMethod<ContractProvider> = await wxtz.createOven(testConfig.ovenOwner.pkh);
+  // Arrange
+  const wxtz = await initWxtz();
 
+  // Act
+  const contractMethod: ContractMethod<ContractProvider> = await wxtz.createOven(testConfig.ovenOwner.pkh);
   const operation: TransactionOperation = await contractMethod.send({ mutez: true, amount: testConfig.amount });
   await operation.confirmation(1);
+
   // TODO avoid casting to any
+  // Assert
   const internalOperations = (operation as any).results[0].metadata.internal_operation_results;
   const firstInternalOperation = internalOperations[0];
   t.is(firstInternalOperation.kind, 'origination');
@@ -125,20 +132,34 @@ test.serial.skip('it can create oven without delegate', async function (t) {
   t.is(secondInternalOperation.amount, '0');
 });
 
-// TODO rewrite test to get all ovens
-test('it can get multiple ovens for a given oven owner', async function (t) {
-  const wxtz = new WXTZ(testConfig.core, wXTZConfig);
-  await wxtz.initialize();
-  const ovens: WXTZOven[] = await wxtz.getAllOvensByOwner(testConfig.ovenOwner.pkh);
-  const firstOven: WXTZOven = await ovens[0].initialize();
-  t.is(await firstOven.getOvenOwner(), testConfig.ovenOwner.pkh);
-  const secondOven: WXTZOven = await ovens[1].initialize();
-  t.is(await secondOven.getOvenOwner(), testConfig.ovenOwner.pkh);
+// TODO change test to all ovens
+test.skip('it can get multiple ovens for a given oven owner', async function (t) {
+  const wxtz = await initWxtz();
+
+  const ovens: string[] = await wxtz.getAllOvenAddressesByOwner(testConfig.ovenOwner.pkh);
+
+  const firstOven: WXTZOven = await new WXTZOven(ovens[0], wXTZConfig).initialize();
+  const firstOvenOwnerAddress = await wxtz.getOwnerAddressForOven(firstOven.getOvenAddress());
+  t.is(firstOvenOwnerAddress, testConfig.ovenOwner.pkh);
 });
 
 test('can get the total locked XTZ for a given oven owner', async function (t) {
+  const wxtz = await initWxtz();
+
+  const totalLockedXTZ: TezosBalance = await wxtz.getTotalLockedXTZ(testConfig.ovenOwner.pkh);
+
+  t.is(totalLockedXTZ.toNumber(), 1000000800);
+});
+
+async function initWxtz() {
+  return await new WXTZ(testConfig.core, wXTZConfig).initialize();
+}
+
+test('get oven owner for given oven address', async function (t) {
   const wxtz = new WXTZ(testConfig.core, wXTZConfig);
   await wxtz.initialize();
-  const totalLockedXTZ: TezosBalance = await wxtz.getTotalLockedXTZ(testConfig.ovenOwner.pkh);
-  t.is(totalLockedXTZ.toNumber(), 4600000100);
+
+  const ovenOwner = await wxtz.getOwnerAddressForOven('KT1VNV6HdLSfvCDXz987PYaZapHUH3WPwFy4');
+
+  t.is(ovenOwner, testConfig.ovenOwner.pkh);
 });

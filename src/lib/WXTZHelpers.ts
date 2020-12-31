@@ -29,8 +29,11 @@ export async function checkIntegrity(checksum: string, contractCode: string): Pr
   return checksum == contractHash ? true : false;
 }
 
+// TODO move this to ApiClient
 export async function fetchContractCode(contractAddress: address, rpcUrl: string): Promise<string> {
-  const response = await axios.get(`${rpcUrl}/chains/main/blocks/head/context/contracts/${contractAddress}`);
-  const contractInfoFromRpc: contractInfoFromRpc = response.data;
+  const response = await axios.get<contractInfoFromRpc>(
+    `${rpcUrl}/chains/main/blocks/head/context/contracts/${contractAddress}`
+  );
+  const contractInfoFromRpc = response.data;
   return JSON.stringify(contractInfoFromRpc.script.code);
 }

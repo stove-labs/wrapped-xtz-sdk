@@ -2,22 +2,25 @@ import { InMemorySigner } from '@taquito/signer';
 import { TezosToolkit } from '@taquito/taquito';
 import test from 'ava';
 
-import { NetworkType } from '../constants/networkType';
+import { NetworkType } from '../constants/networkTypes';
 import testConfig from '../test/config';
-import { address, delegate, mutez } from '../types/types';
+import { address, delegate, wXTZConfig } from '../types/types';
 
 import { WXTZOven } from './WXTZOven';
 
-let wXTZConfig: { tezos: TezosToolkit; network: NetworkType };
+let wXTZConfig: wXTZConfig;
 
 test.before('set rpc', async function (t) {
   const Tezos = new TezosToolkit(testConfig.rpc);
+
   Tezos.setProvider({
     signer: new InMemorySigner(testConfig.ovenOwner.sk),
   });
+
   wXTZConfig = {
     tezos: Tezos,
     network: NetworkType.delphinet,
+    checkIntegrity: false,
   };
   t.pass();
 });
@@ -29,39 +32,37 @@ test('initializes oven contract', async function (t) {
 });
 
 test('gets core address', async function (t) {
-  const wxtzOven = new WXTZOven(testConfig.ovenWithoutDelegate, wXTZConfig);
-  await wxtzOven.initialize();
-  const coreAddress: address = await wxtzOven.getCoreContractAddress();
+  const wxtzOven = await initWxtzOven(testConfig.ovenWithoutDelegate);
+
+  const coreAddress: address = await wxtzOven.getCoreAddress();
+
   t.is(coreAddress, testConfig.core);
 });
 
-test('gets oven owner address', async function (t) {
-  const wxtzOven = new WXTZOven(testConfig.ovenWithoutDelegate, wXTZConfig);
-  await wxtzOven.initialize();
-  const ovenOwner: address = await wxtzOven.getOvenOwner();
-  t.is(ovenOwner, testConfig.ovenOwner.pkh);
-});
+// TODO update test config to an oven with delegate that was originated from same core
+test.skip('gets delegate address if delegate was set', async function (t) {
+  const wxtzOven = await initWxtzOven(testConfig.ovenWithDelegate);
 
-test('gets delegate address if delegate was set', async function (t) {
-  const wxtzOven = new WXTZOven(testConfig.ovenWithDelegate, wXTZConfig);
-  await wxtzOven.initialize();
   const delegate: delegate = await wxtzOven.getDelegate();
+
   t.is(delegate, testConfig.delegate);
 });
 
 test('gets delegate address if delegate was not set', async function (t) {
-  const wxtzOven = new WXTZOven(testConfig.ovenWithoutDelegate, wXTZConfig);
-  await wxtzOven.initialize();
+  const wxtzOven = await initWxtzOven(testConfig.ovenWithoutDelegate);
+
   const delegate: delegate = await wxtzOven.getDelegate();
+
   t.is(delegate, null);
 });
 
 test('gets date of contract origination', async function (t) {
-  const wxtzOven = new WXTZOven(testConfig.ovenWithoutDelegate, wXTZConfig);
-  await wxtzOven.initialize();
+  const wxtzOven = await initWxtzOven(testConfig.ovenWithoutDelegate);
+
   const originatedAt: Date = await wxtzOven.getOriginatedAt();
+
   // TODO change assertion to deep equal and remove to string conversion
-  t.is(originatedAt.toISOString(), '2020-12-27T21:52:00.000Z');
+  t.is(originatedAt.toISOString(), '2020-12-31T11:21:39.000Z');
 });
 
 test.serial.skip('place XTZ deposit in oven contract', async function (t) {
@@ -89,3 +90,17 @@ test.serial.skip('withdraw from oven contract', async function (t) {
   const balanceAfter = await wxtzOven.getBalance();
   t.is(balanceAfter.toNumber(), balanceBefore.minus(amountToWithdraw).toNumber());
 });
+
+test('removes delegate', async function (t) {
+  const wxtzOven = await initWxtzOven(testConfig.ovenWithoutDelegate);
+
+  const operation = await (await wxtzOven.removeDelegate()).send();
+  await operation.confirmation(1);
+
+  const delegate: delegate = await wxtzOven.getDelegate();
+  t.is(delegate, null);
+});
+
+async function initWxtzOven(ovenAddress: address) {
+  return await new WXTZOven(ovenAddress, wXTZConfig).initialize();
+}
