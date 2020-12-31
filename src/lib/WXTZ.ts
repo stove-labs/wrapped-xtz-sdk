@@ -1,12 +1,8 @@
-import { ContractAbstraction, ContractMethod, ContractProvider, TezosToolkit, Wallet } from '@taquito/taquito';
-import axios from 'axios';
+import { ContractAbstraction, ContractMethod, ContractProvider, Wallet } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 
-import { ContractType } from '../constants/contractType';
-import { deployments } from '../constants/deployments';
-import { IndexerUrl } from '../constants/indexer';
-import { MichelsonType } from '../constants/michelsonType';
-import { NetworkType } from '../constants/networkType';
+import { ContractType } from '../constants/contractTypes';
+import { MichelsonTypes } from '../constants/michelsonTypes';
 import {
   address,
   arbitraryValue,
@@ -16,67 +12,84 @@ import {
   lambdaName,
   lambdaParameter,
   michelsonType,
-  ovenBcdResponse,
   ovenOwner,
   packedArbitraryValue,
   TezosBalance,
   wXTZConfig,
 } from '../types/types';
 
-import { checkIntegrity, fetchContractCode, packMichelson, sha256, unpack } from './WXTZHelpers';
-import { WXTZOven } from './WXTZOven';
+import { AllOvensByOwnerGetter } from './AllOvensByOwnerGetter';
+import { DeploymentsGetter } from './DeploymentsGetter';
+import { TotalXTZGetter } from './TotalXTZGetter';
+import { WXTZBaseSmartContract } from './WXTZBaseSmartContract';
+import { checkIntegrity, packMichelson, unpack } from './WXTZHelpers';
 
-export class WXTZ {
-  readonly coreAddress: address;
-  // TODO remove ! from instance and handle errors (eg. "not initialized")
+export class WXTZ extends WXTZBaseSmartContract {
   public instance!: ContractAbstraction<ContractProvider | Wallet>;
-  private Tezos: TezosToolkit;
-  public network: NetworkType;
-  private checkIntegrity: boolean;
 
-  constructor(coreAddress: address, wXTZConfig: wXTZConfig) {
-    this.coreAddress = coreAddress;
-    this.Tezos = wXTZConfig.tezos;
-    this.network = wXTZConfig.network;
-    this.checkIntegrity = wXTZConfig.checkIntegrity ?? true;
+  public constructor(coreAddress: address, wXTZConfig: wXTZConfig) {
+    super(coreAddress, wXTZConfig, ContractType.core);
+  }
+
+  public async initialize(): Promise<WXTZ> {
+    await super.Initialize();
+    return this;
   }
 
   public getCoreAddress(): address {
     return this.instance.address;
   }
 
-  private async coreHasIntegrity(): Promise<boolean> {
-    const contractCodeMicheline = await fetchContractCode(this.coreAddress, this.Tezos.rpc.getRpcUrl());
-    return await checkIntegrity(deployments[this.network][ContractType.core].checksum, contractCodeMicheline);
-  }
-
-  private async ovenHasIntegrity(): Promise<boolean> {
-    const packedCreateOvenBytes = await this.getPackedLambda('entrypoint/createOven');
-    console.log('oven bytes', await sha256(packedCreateOvenBytes));
-    return await checkIntegrity(deployments[this.network][ContractType.oven].checksum, packedCreateOvenBytes);
-  }
-
-  private async failIfNoIntegrity(): Promise<void> {
-    const coreHasIntegrity = await this.coreHasIntegrity();
-    const ovenHasIntegrity = await this.ovenHasIntegrity();
-
-    const hasIntegrity = coreHasIntegrity && ovenHasIntegrity;
-    if (hasIntegrity == false) {
-      throw new Error('Contract does not pass checksum check');
-    }
-  }
-
-  public async initialize(): Promise<WXTZ> {
-    this.instance = await this.Tezos.contract.at(this.coreAddress);
-    if (this.checkIntegrity === true) {
-      await this.failIfNoIntegrity();
-    }
-    // TODO check whether address matches with saved address in deployments
-    return this;
-  }
-
   public async getWXTZTokenContractAddress() {
-    return await this.getArbitraryValue('wXTZTokenContractAddress', MichelsonType.wXTZTokenContractAddress);
+    return await this.getArbitraryValue('wXTZTokenContractAddress', MichelsonTypes.wXTZTokenContractAddress);
+  }
+
+  /**
+   * Need to call .send() on this contract method to invoke the smart contract call.
+   * Pass optional XTZ amount as sendParameter in .send().
+   *
+   * @param ovenOwner The address of the oven owner.
+   * @param delegate The address of the registered baker.
+   */
+  public async createOven(
+    ovenOwner: ovenOwner,
+    delegate?: address
+  ): Promise<ContractMethod<ContractProvider | Wallet>> {
+    // make sure that the create oven method of the core smart contract passes the checksum
+    if (this.checkIntegrity) await this.verifyCreateOvenMethod();
+
+    const lambdaParameter = this.composeLambdaParameterCreateOven(delegate, ovenOwner);
+    return this.runEntrypointLambda('createOven', lambdaParameter);
+  }
+
+  public async getAllOvenAddressesByOwner(ovenOwner: ovenOwner): Promise<string[]> {
+    const bigMapId = await this.getBigMapIdOvens();
+    return await AllOvensByOwnerGetter.get(ovenOwner, bigMapId, this.network);
+  }
+
+  public async getTotalLockedXTZ(ovenOwner: ovenOwner): Promise<TezosBalance> {
+    const allOvens = await this.getAllOvenAddressesByOwner(ovenOwner);
+    return await TotalXTZGetter.get(allOvens, this.Tezos);
+  }
+
+  // TODO test
+  public async getOwnerAddressForOven(ovenAddress: address): Promise<ovenOwner> {
+    const ovenOwner = await (await this.getStorage()).ovens.get(ovenAddress);
+    if (ovenOwner === undefined) throw new Error('No oven owner found for given oven address');
+    return ovenOwner;
+  }
+
+  private async verifyCreateOvenMethod(): Promise<boolean> {
+    const checksum = DeploymentsGetter.getChecksum(ContractType.lambdaCreateOven, this.network);
+    const packedCreateOvenBytes = await this.getPackedLambda('entrypoint/createOven');
+    return await checkIntegrity(checksum, packedCreateOvenBytes);
+  }
+
+  private composeLambdaParameterCreateOven(delegate: string | undefined, ovenOwner: string) {
+    const delegateParameter = delegate !== undefined ? `Some "${delegate}"` : 'None';
+    const code = `Pair ${delegateParameter} "${ovenOwner}"`;
+    const lambdaParameter = packMichelson(code, MichelsonTypes.createOven);
+    return lambdaParameter;
   }
 
   private async getStorage(): Promise<CoreContractStorage> {
@@ -96,23 +109,6 @@ export class WXTZ {
     return unpack(packedArbitraryValue, michelsonType);
   }
 
-  /**
-   * Need to call .send() on this contract method to invoke the smart contract call.
-   * Pass optional XTZ amount as sendParameter in .send().
-   *
-   * @param ovenOwner The address of the oven owner.
-   * @param delegate The address of the registered baker.
-   */
-  public async createOven(
-    ovenOwner: ovenOwner,
-    delegate?: address
-  ): Promise<ContractMethod<ContractProvider | Wallet>> {
-    const delegateParameter = delegate !== undefined ? `Some "${delegate}"` : 'None';
-    const code = `Pair ${delegateParameter} "${ovenOwner}"`;
-    const lambdaParameter = packMichelson(code, MichelsonType.createOven);
-    return this.runEntrypointLambda('createOven', lambdaParameter);
-  }
-
   private async runEntrypointLambda(
     lambdaName: lambdaName,
     lambdaParameter: lambdaParameter
@@ -122,35 +118,5 @@ export class WXTZ {
 
   private async getBigMapIdOvens(): Promise<BigNumber> {
     return (await this.getStorage()).ovens.id;
-  }
-
-  public async getAllOvensByOwner(ovenOwner: ovenOwner): Promise<WXTZOven[]> {
-    const bigMapId = (await this.getBigMapIdOvens()).toNumber();
-    const indexerUrl = IndexerUrl.searchKeyByValue[this.network];
-    const response = await axios.get(`${indexerUrl}/${bigMapId}/keys`, {
-      params: {
-        q: ovenOwner,
-        offset: 0,
-      },
-    });
-
-    const wXTZConfig: wXTZConfig = { tezos: this.Tezos, network: this.network, checkIntegrity: this.checkIntegrity };
-    const ovens: WXTZOven[] = [];
-    response.data.map((oven: ovenBcdResponse) => {
-      ovens.push(new WXTZOven(oven.data.key_string, wXTZConfig));
-    });
-    return ovens;
-  }
-
-  public async getTotalLockedXTZ(ovenOwner: ovenOwner): Promise<TezosBalance> {
-    const allOvens = await this.getAllOvensByOwner(ovenOwner);
-    let totalLockedXTZ: TezosBalance = new BigNumber(0);
-    await Promise.all(
-      allOvens.map(async (oven: WXTZOven) => {
-        const ovenBalance: BigNumber = await this.Tezos.tz.getBalance(oven.ovenAddress);
-        totalLockedXTZ = totalLockedXTZ.plus(ovenBalance);
-      })
-    );
-    return totalLockedXTZ;
   }
 }

@@ -1,21 +1,10 @@
-import {
-  Contract,
-  ContractAbstraction,
-  ContractMethod,
-  ContractProvider,
-  TezosToolkit,
-  UnitValue,
-  Wallet,
-} from '@taquito/taquito';
-import axios from 'axios';
+import { ContractMethod, ContractProvider, UnitValue, Wallet } from '@taquito/taquito';
 
-import { deployments } from '../constants/deployments';
-import { IndexerUrl } from '../constants/indexer';
-import { NetworkType } from '../constants/networkType';
+import { ContractType } from '../constants/contractTypes';
 import {
   address,
   blockHeight,
-  CoreContractStorage,
+  contractDetail,
   delegate,
   mutez,
   OvenContractStorage,
@@ -23,102 +12,70 @@ import {
   wXTZConfig,
 } from '../types/types';
 
-// TODO reorder functions in class (public/private)
-export class WXTZOven {
-  readonly ovenAddress: address;
-  private Tezos: TezosToolkit;
-  // TODO remove ! from oven- and coreInstance and handle errors (eg. "not initialized")
-  private ovenInstance!: ContractAbstraction<ContractProvider | Wallet>;
-  private coreInstance!: ContractAbstraction<ContractProvider | Wallet>;
-  public network: NetworkType;
-  private checkIntegrity: boolean;
-
+import { ApiClient } from './ApiClient';
+import { DeploymentsGetter } from './DeploymentsGetter';
+import { WXTZBaseSmartContract } from './WXTZBaseSmartContract';
+export class WXTZOven extends WXTZBaseSmartContract {
   constructor(ovenContract: address, wXTZConfig: wXTZConfig) {
-    this.ovenAddress = ovenContract;
-    this.Tezos = wXTZConfig.tezos;
-    this.network = wXTZConfig.network;
-    this.checkIntegrity = wXTZConfig.checkIntegrity ?? true;
-  }
-
-  private async failIfNotOriginatedByTrustedCore(): Promise<void> {
-    const coreContractAddress = await this.getCoreContractAddress();
-
-    const trustedCore = coreContractAddress === deployments[this.network].core.address;
-    if (trustedCore == false) {
-      throw new Error('Oven was not originated by trusted core contract.');
-    }
+    super(ovenContract, wXTZConfig, ContractType.oven);
   }
 
   public async initialize(): Promise<WXTZOven> {
-    this.ovenInstance = await this.Tezos.contract.at(this.ovenAddress);
-    if (this.checkIntegrity === true) {
-      await this.failIfNotOriginatedByTrustedCore();
-    }
+    await super.Initialize();
+    if (!this.checkIntegrity) await this.throwErrorIfNotOriginatedByTrustedCore();
     return this;
   }
 
-  private async getOvenContractStorage(): Promise<OvenContractStorage> {
-    return await this.ovenInstance.storage();
+  public async getCoreAddress(): Promise<address> {
+    return await this.getStorage();
   }
 
-  public async getCoreContractAddress(): Promise<address> {
-    return await this.getOvenContractStorage();
+  public getOvenAddress(): address {
+    return this.instance.address;
   }
 
-  private async initializeCoreContractInstance(): Promise<ContractAbstraction<ContractProvider | Wallet>> {
-    const coreContractAddress: address = await this.getCoreContractAddress();
-    this.coreInstance = await this.Tezos.contract.at(coreContractAddress);
-    return this.coreInstance;
-  }
-
-  private async getCoreContractStorage(): Promise<CoreContractStorage> {
-    await this.initializeCoreContractInstance();
-    return await this.coreInstance.storage();
-  }
-
-  public async getOvenOwner(): Promise<address> {
-    return (await this.getCoreContractStorage()).ovens.get(this.ovenAddress);
-  }
-
+  /**
+   * Returns delegate of oven.
+   */
   public async getDelegate(): Promise<delegate> {
     try {
-      return await this.Tezos.rpc.getDelegate(this.ovenAddress);
-    } catch {
-      return null;
+      return await this.Tezos.rpc.getDelegate(this.getOvenAddress());
+    } catch (err) {
+      if (err.status == 404) return null;
+      throw err;
     }
   }
 
+  /**
+   * Returns time of creation for this oven.
+   */
   public async getOriginatedAt(): Promise<Date> {
-    const indexerUrl = IndexerUrl.contractHistory[this.network];
-    const response = await axios.get(`${indexerUrl}/${this.ovenAddress}`);
-    return new Date(response.data.timestamp);
+    return new Date((await this.getContractInfo()).timestamp);
   }
 
+  /**
+   * Returns block height of creation for this oven.
+   */
   public async getOriginatedAtLevel(): Promise<blockHeight> {
-    const indexerUrl = IndexerUrl.contractHistory[this.network];
-    const response = await axios.get(`${indexerUrl}/${this.ovenAddress}`);
-    return response.data.level;
+    return await (await this.getContractInfo()).level;
   }
 
+  /**
+   * Returns last time of action for this oven.
+   */
   public async getUpdatedAt(): Promise<Date> {
-    const indexerUrl = IndexerUrl.contractHistory[this.network];
-    const response = await axios.get(`${indexerUrl}/${this.ovenAddress}`);
-    return new Date(response.data.last_action);
+    return new Date((await this.getContractInfo()).last_action);
   }
 
-  //   public async getLastStates(): Promise<any> {
-  //     const indexerUrl = IndexerUrl.contractHistory[this.network];
-  //     const response = await axios.get(`${indexerUrl}/operations`, {
-  //       params: {
-  //         status: 'applied',
-  //       },
-  //     });
-  //     const operationsHistory = response.data;
-  //     return;
-  //   }
+  public async getLastStates(): Promise<any> {
+    return await ApiClient.getContractHistory(this.getOvenAddress(), this.network);
+  }
 
+  /**
+   * Returns XTZ balance for this oven.
+   */
   public async getBalance(): Promise<TezosBalance> {
-    return await this.Tezos.tz.getBalance(this.ovenAddress);
+    return await this.Tezos.tz.getBalance(this.getOvenAddress());
   }
 
   /**
@@ -126,7 +83,7 @@ export class WXTZOven {
    * on this ContractMethod.
    */
   public async deposit(): Promise<ContractMethod<ContractProvider | Wallet>> {
-    return this.ovenInstance.methods.default(UnitValue);
+    return this.instance.methods.default(UnitValue);
   }
 
   /**
@@ -135,19 +92,39 @@ export class WXTZOven {
    * @param amount Amount in mutez to withdraw from the oven.
    */
   public async withdraw(amount: mutez): Promise<ContractMethod<ContractProvider | Wallet>> {
-    return this.ovenInstance.methods.withdraw(amount);
+    return this.instance.methods.withdraw(amount);
   }
 
   /**
-   *  Need to call .send() on this ContractMethod.
+   * Need to call .send() on this ContractMethod.
    *
    * @param delegate Provide a registered baker as delegate.
    */
   public async setDelegate(delegate: delegate): Promise<ContractMethod<ContractProvider | Wallet>> {
-    return this.ovenInstance.methods.setDelegate(delegate);
+    return this.instance.methods.setDelegate(delegate);
   }
 
+  /**
+   * Removes delegate for this oven.
+   * Need to call .send() on this ContractMethod.
+   */
   public async removeDelegate(): Promise<ContractMethod<ContractProvider | Wallet>> {
     return this.setDelegate(null);
+  }
+
+  private async throwErrorIfNotOriginatedByTrustedCore(): Promise<void> {
+    const coreContractAddress = await this.getCoreAddress();
+    const trustedCore = coreContractAddress === DeploymentsGetter.getAddress(ContractType.core, this.network);
+    if (trustedCore == false) {
+      throw new Error('Oven was not originated by trusted core contract.');
+    }
+  }
+
+  private async getStorage(): Promise<OvenContractStorage> {
+    return await this.instance.storage();
+  }
+
+  private async getContractInfo(): Promise<contractDetail> {
+    return await ApiClient.getContractInfo(this.getOvenAddress(), this.network);
   }
 }
