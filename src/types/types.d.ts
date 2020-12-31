@@ -13,27 +13,11 @@ declare type blockHeight = number;
 
 declare type checksum = string;
 
-declare type contractDeployment = {
-  checksum: checksum;
-  address?: address;
-};
-
 // TODO check if bigNumber is really not accepted by taquito as send parameter
 declare type mutez = number;
 
 declare type TezosBalance = BigNumber;
-
-declare type contractDeployments = {
-  core: contractDeployment;
-  oven: contractDeployment;
-  token: contractDeployment;
-};
-
-declare type deployments = {
-  mainnet: contractDeployments;
-  delphinet: contractDeployments;
-  localhost: contractDeployments;
-};
+declare type WrappedXTZBalance = TezosBalance;
 
 declare type arbitraryValueKey = string;
 declare type arbitraryValue = string | number;
@@ -44,9 +28,6 @@ declare type packedArbitraryValue = bytes;
 declare type lambdaParameter = bytes;
 declare type michelsonType = string;
 
-/**
- * Default behavior is to check integrity.
- */
 declare type wXTZConfig = {
   tezos: TezosToolkit;
   network: NetworkType;
@@ -74,6 +55,15 @@ interface CoreContractStorage {
 
 type OvenContractStorage = address;
 
+type TokenContractStorage = {
+  token: {
+    ledger: {
+      get(key: ovenOwner): Promise<WrappedXTZBalance>;
+    };
+    totalSupply: BigNumber;
+  };
+};
+
 declare type ovenBcdResponse = {
   data: {
     key_string: address;
@@ -98,4 +88,10 @@ declare type contractInfoFromRpc = {
     code: micheline;
     storage: any;
   };
+};
+
+declare type contractDetail = {
+  timestamp: string;
+  level: blockHeight;
+  last_action: string;
 };
