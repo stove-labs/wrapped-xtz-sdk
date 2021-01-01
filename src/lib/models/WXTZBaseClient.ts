@@ -1,13 +1,13 @@
 import { ContractAbstraction, ContractProvider, TezosToolkit, Wallet } from '@taquito/taquito';
 
-import { ContractType } from '../constants/contractTypes';
-import { NetworkType } from '../constants/networkTypes';
-import { address, wXTZConfig } from '../types/types';
+import { ContractType } from '../../enums/contractTypes';
+import { NetworkType } from '../../enums/networkTypes';
+import { ByteConversionUtils } from '../services/ByteConversionUtils';
+import { DeploymentsPropertyGetter } from '../services/DeploymentsPropertyGetter';
+import { TezosRpcClient } from '../services/TezosRpcClient';
+import { address, wXTZConfig } from '../types';
 
-import { DeploymentsGetter } from './DeploymentsGetter';
-import { checkIntegrity, fetchContractCode } from './WXTZHelpers';
-
-export abstract class WXTZBaseSmartContract {
+export abstract class WXTZBaseClient {
   protected instance!: ContractAbstraction<ContractProvider | Wallet>;
   protected Tezos: TezosToolkit;
   protected network: NetworkType;
@@ -24,7 +24,7 @@ export abstract class WXTZBaseSmartContract {
     this.contractType = contractType;
   }
 
-  public async Initialize(): Promise<void> {
+  protected async Initialize(): Promise<void> {
     this.instance = await this.Tezos.contract.at(this.address);
     if (this.checkIntegrity === true) {
       await this.verifyThatIntegrityIsValid();
@@ -41,8 +41,8 @@ export abstract class WXTZBaseSmartContract {
   }
 
   private async checkContractIntegrity(): Promise<boolean> {
-    const contractCodeMicheline = await fetchContractCode(this.address, this.Tezos.rpc.getRpcUrl());
-    const checksum = DeploymentsGetter.getChecksum(this.contractType, this.network);
-    return await checkIntegrity(checksum, contractCodeMicheline);
+    const contractCodeMicheline = await TezosRpcClient.fetchContractCode(this.address, this.Tezos.rpc.getRpcUrl());
+    const checksum = DeploymentsPropertyGetter.getChecksum(this.contractType, this.network);
+    return await ByteConversionUtils.checkIntegrity(checksum, contractCodeMicheline);
   }
 }

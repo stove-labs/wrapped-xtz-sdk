@@ -1,11 +1,11 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import BigNumber from 'bignumber.js';
 
-import { Constants } from '../constants/constants';
-import { NetworkType } from '../constants/networkTypes';
-import { address, contractDetail, ovenBcdResponse } from '../types/types';
+import { Constants } from '../../constants/constants';
+import { NetworkType } from '../../enums/networkTypes';
+import { address, contractDetail, ovenBcdResponse } from '../types';
 
-export class ApiClient {
+export class BlockchainIndexerClient {
   /**
    * Returns all keys for a given value in a big map.
    *
@@ -13,7 +13,7 @@ export class ApiClient {
    * @param bigMapId ID of the big map.
    * @param network Network type.
    */
-  public static async getKeysByValue(
+  public static async getBigMapKeysByValue(
     value: string,
     bigMapId: BigNumber,
     network: NetworkType
@@ -57,19 +57,19 @@ export class ApiClient {
     return await this.getContractOperationsEndpoint(address, network);
   }
 
-  private static getBigMapEndpoint(value: string, bigMapId: BigNumber, network: NetworkType) {
+  private static getBigMapEndpoint(value: string, bigMapId: BigNumber, network: NetworkType): string {
     return `/v1/bigmap/${network}/${bigMapId.toNumber()}/keys?q=${value}&offset=0`;
   }
 
-  private static getContractEndpoint(address: address, network: NetworkType) {
+  private static getContractEndpoint(address: address, network: NetworkType): string {
     return `/v1/contract/${network}/${address}`;
   }
 
-  private static getContractOperationsEndpoint(address: address, network: NetworkType) {
+  private static getContractOperationsEndpoint(address: address, network: NetworkType): string {
     return `${this.getContractEndpoint(address, network)}/operations?status=applied`;
   }
 
-  private static async create() {
+  private static async create(): Promise<AxiosInstance> {
     return axios.create({
       baseURL: Constants.indexerBaseUrl,
       responseType: 'json',

@@ -1,2 +1,3 @@
-export * from './lib/WXTZ';
-export * from './lib/WXTZOven';
+export * from './lib/models/WXTZCoreClient';
+export * from './lib/models/WXTZOvenClient';
+export * from './lib/models/WXTZTokenClient';

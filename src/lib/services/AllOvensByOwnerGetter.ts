@@ -1,9 +1,9 @@
 import BigNumber from 'bignumber.js';
 
-import { NetworkType } from '../constants/networkTypes';
-import { ovenBcdResponse, ovenOwner } from '../types/types';
+import { NetworkType } from '../../enums/networkTypes';
+import { ovenBcdResponse, ovenOwner } from '../types';
 
-import { ApiClient } from './ApiClient';
+import { BlockchainIndexerClient } from './BlockchainIndexerClient';
 
 export class AllOvensByOwnerGetter {
   /**
@@ -20,7 +20,7 @@ export class AllOvensByOwnerGetter {
   }
 
   private static async fetchOvenToOwnerMappings(ovenOwner: ovenOwner, bigMapId: BigNumber, network: NetworkType) {
-    return await ApiClient.getKeysByValue(ovenOwner, bigMapId, network);
+    return await BlockchainIndexerClient.getBigMapKeysByValue(ovenOwner, bigMapId, network);
   }
 
   private static extractOvenAddresses(ovenMappings: ovenBcdResponse[]) {

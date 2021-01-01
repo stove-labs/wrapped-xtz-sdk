@@ -1,10 +1,10 @@
-import { Constants } from '../constants/constants';
-import { ContractType } from '../constants/contractTypes';
-import { ovenOwner, tokenAddress, TokenContractStorage, WrappedXTZBalance, wXTZConfig } from '../types/types';
+import { Constants } from '../../constants/constants';
+import { ContractType } from '../../enums/contractTypes';
+import { ovenOwner, tokenAddress, TokenContractStorage, WrappedXTZBalance, wXTZConfig } from '../types';
 
-import { WXTZBaseSmartContract } from './WXTZBaseSmartContract';
+import { WXTZBaseClient } from './WXTZBaseClient';
 
-export class WXTZToken extends WXTZBaseSmartContract {
+export class WXTZTokenClient extends WXTZBaseClient {
   constructor(tokenAddress: tokenAddress, wXTZConfig: wXTZConfig) {
     super(tokenAddress, wXTZConfig, ContractType.token);
   }

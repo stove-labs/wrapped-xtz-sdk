@@ -1,26 +1,14 @@
-import { Constants, Deployment } from '../constants/constants';
-import { ContractType } from '../constants/contractTypes';
-import { NetworkType } from '../constants/networkTypes';
-import { checksum } from '../types/types';
+import { Constants, Deployment } from '../../constants/constants';
+import { ContractType } from '../../enums/contractTypes';
+import { NetworkType } from '../../enums/networkTypes';
+import { checksum } from '../../types/types';
 
-export class DeploymentsGetter {
-  /**
-   * Returns checksum of trusted contract code.
-   *
-   * @param contractType Contract type in the wXTZ project.
-   * @param networkType Network type.
-   */
+export class DeploymentsPropertyGetter {
   static getChecksum(contractType: ContractType, networkType: NetworkType) {
     const deployment: Deployment = this.getDeployment(networkType);
     return this.getChecksumFromTrustedDeployment(deployment, contractType);
   }
 
-  /**
-   * Returns address of trusted deployments.
-   *
-   * @param contractType Contract type in the wXTZ project.
-   * @param networkType Network type.
-   */
   static getAddress(contractType: ContractType, networkType: NetworkType) {
     const deployment: Deployment = this.getDeployment(networkType);
     const address = this.getAddressFromTrustedDeployment(deployment, contractType);

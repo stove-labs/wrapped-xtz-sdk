@@ -1,6 +1,8 @@
 import { ContractMethod, ContractProvider, UnitValue, Wallet } from '@taquito/taquito';
 
-import { ContractType } from '../constants/contractTypes';
+import { ContractType } from '../../enums/contractTypes';
+import { BlockchainIndexerClient } from '../services/BlockchainIndexerClient';
+import { DeploymentsPropertyGetter } from '../services/DeploymentsPropertyGetter';
 import {
   address,
   blockHeight,
@@ -10,17 +12,16 @@ import {
   OvenContractStorage,
   TezosBalance,
   wXTZConfig,
-} from '../types/types';
+} from '../types';
 
-import { ApiClient } from './ApiClient';
-import { DeploymentsGetter } from './DeploymentsGetter';
-import { WXTZBaseSmartContract } from './WXTZBaseSmartContract';
-export class WXTZOven extends WXTZBaseSmartContract {
+import { WXTZBaseClient } from './WXTZBaseClient';
+
+export class WXTZOvenClient extends WXTZBaseClient {
   constructor(ovenContract: address, wXTZConfig: wXTZConfig) {
     super(ovenContract, wXTZConfig, ContractType.oven);
   }
 
-  public async initialize(): Promise<WXTZOven> {
+  public async initialize(): Promise<WXTZOvenClient> {
     await super.Initialize();
     if (!this.checkIntegrity) await this.throwErrorIfNotOriginatedByTrustedCore();
     return this;
@@ -35,7 +36,7 @@ export class WXTZOven extends WXTZBaseSmartContract {
   }
 
   /**
-   * Returns delegate of oven.
+   * Returns the address of the baker this oven has delegated to.
    */
   public async getDelegate(): Promise<delegate> {
     try {
@@ -47,32 +48,32 @@ export class WXTZOven extends WXTZBaseSmartContract {
   }
 
   /**
-   * Returns time of creation for this oven.
+   * Returns the date and time this oven was created.
    */
   public async getOriginatedAt(): Promise<Date> {
     return new Date((await this.getContractInfo()).timestamp);
   }
 
   /**
-   * Returns block height of creation for this oven.
+   * Returns the block height when this oven was created.
    */
   public async getOriginatedAtLevel(): Promise<blockHeight> {
     return await (await this.getContractInfo()).level;
   }
 
   /**
-   * Returns last time of action for this oven.
+   * Returns the last time of action for this oven.
    */
   public async getUpdatedAt(): Promise<Date> {
     return new Date((await this.getContractInfo()).last_action);
   }
 
   public async getLastStates(): Promise<any> {
-    return await ApiClient.getContractHistory(this.getOvenAddress(), this.network);
+    return await BlockchainIndexerClient.getContractHistory(this.getOvenAddress(), this.network);
   }
 
   /**
-   * Returns XTZ balance for this oven.
+   * Returns the XTZ balance of this oven.
    */
   public async getBalance(): Promise<TezosBalance> {
     return await this.Tezos.tz.getBalance(this.getOvenAddress());
@@ -114,7 +115,7 @@ export class WXTZOven extends WXTZBaseSmartContract {
 
   private async throwErrorIfNotOriginatedByTrustedCore(): Promise<void> {
     const coreContractAddress = await this.getCoreAddress();
-    const trustedCore = coreContractAddress === DeploymentsGetter.getAddress(ContractType.core, this.network);
+    const trustedCore = coreContractAddress === DeploymentsPropertyGetter.getAddress(ContractType.core, this.network);
     if (trustedCore == false) {
       throw new Error('Oven was not originated by trusted core contract.');
     }
@@ -125,6 +126,6 @@ export class WXTZOven extends WXTZBaseSmartContract {
   }
 
   private async getContractInfo(): Promise<contractDetail> {
-    return await ApiClient.getContractInfo(this.getOvenAddress(), this.network);
+    return await BlockchainIndexerClient.getContractInfo(this.getOvenAddress(), this.network);
   }
 }

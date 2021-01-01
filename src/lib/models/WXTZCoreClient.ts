@@ -1,37 +1,37 @@
 import { ContractAbstraction, ContractMethod, ContractProvider, Wallet } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 
-import { ContractType } from '../constants/contractTypes';
-import { MichelsonTypes } from '../constants/michelsonTypes';
+import { ContractType } from '../../enums/contractTypes';
+import { MichelsonTypes } from '../../enums/michelsonTypes';
+import { AllOvensByOwnerGetter } from '../services/AllOvensByOwnerGetter';
+import { ByteConversionUtils } from '../services/ByteConversionUtils';
+import { DeploymentsPropertyGetter } from '../services/DeploymentsPropertyGetter';
+import { TotalXTZGetter } from '../services/TotalXTZGetter';
 import {
   address,
   arbitraryValue,
   arbitraryValueKey,
-  bytes,
   CoreContractStorage,
   lambdaName,
   lambdaParameter,
   michelsonType,
   ovenOwner,
   packedArbitraryValue,
+  packedLambda,
   TezosBalance,
   wXTZConfig,
-} from '../types/types';
+} from '../types';
 
-import { AllOvensByOwnerGetter } from './AllOvensByOwnerGetter';
-import { DeploymentsGetter } from './DeploymentsGetter';
-import { TotalXTZGetter } from './TotalXTZGetter';
-import { WXTZBaseSmartContract } from './WXTZBaseSmartContract';
-import { checkIntegrity, packMichelson, unpack } from './WXTZHelpers';
+import { WXTZBaseClient } from './WXTZBaseClient';
 
-export class WXTZ extends WXTZBaseSmartContract {
+export class WXTZCoreClient extends WXTZBaseClient {
   public instance!: ContractAbstraction<ContractProvider | Wallet>;
 
   public constructor(coreAddress: address, wXTZConfig: wXTZConfig) {
     super(coreAddress, wXTZConfig, ContractType.core);
   }
 
-  public async initialize(): Promise<WXTZ> {
+  public async initialize(): Promise<WXTZCoreClient> {
     await super.Initialize();
     return this;
   }
@@ -68,8 +68,8 @@ export class WXTZ extends WXTZBaseSmartContract {
   }
 
   public async getTotalLockedXTZ(ovenOwner: ovenOwner): Promise<TezosBalance> {
-    const allOvens = await this.getAllOvenAddressesByOwner(ovenOwner);
-    return await TotalXTZGetter.get(allOvens, this.Tezos);
+    const allOvenAddresses = await this.getAllOvenAddressesByOwner(ovenOwner);
+    return await TotalXTZGetter.get(allOvenAddresses, this.Tezos);
   }
 
   // TODO test
@@ -80,15 +80,15 @@ export class WXTZ extends WXTZBaseSmartContract {
   }
 
   private async verifyCreateOvenMethod(): Promise<boolean> {
-    const checksum = DeploymentsGetter.getChecksum(ContractType.lambdaCreateOven, this.network);
+    const checksum = DeploymentsPropertyGetter.getChecksum(ContractType.core, this.network);
     const packedCreateOvenBytes = await this.getPackedLambda('entrypoint/createOven');
-    return await checkIntegrity(checksum, packedCreateOvenBytes);
+    return await ByteConversionUtils.checkIntegrity(checksum, packedCreateOvenBytes);
   }
 
   private composeLambdaParameterCreateOven(delegate: string | undefined, ovenOwner: string) {
     const delegateParameter = delegate !== undefined ? `Some "${delegate}"` : 'None';
     const code = `Pair ${delegateParameter} "${ovenOwner}"`;
-    const lambdaParameter = packMichelson(code, MichelsonTypes.createOven);
+    const lambdaParameter = ByteConversionUtils.packMichelson(code, MichelsonTypes.createOven);
     return lambdaParameter;
   }
 
@@ -96,7 +96,7 @@ export class WXTZ extends WXTZBaseSmartContract {
     return await this.instance.storage();
   }
 
-  private async getPackedLambda(key: lambdaName): Promise<bytes> {
+  private async getPackedLambda(key: lambdaName): Promise<packedLambda> {
     return await (await this.getStorage()).lambdas.get(key);
   }
 
@@ -106,7 +106,7 @@ export class WXTZ extends WXTZBaseSmartContract {
 
   private async getArbitraryValue(key: arbitraryValueKey, michelsonType: michelsonType): Promise<arbitraryValue> {
     const packedArbitraryValue = await this.getPackedArbitraryValue(key);
-    return unpack(packedArbitraryValue, michelsonType);
+    return ByteConversionUtils.unpack(packedArbitraryValue, michelsonType);
   }
 
   private async runEntrypointLambda(
