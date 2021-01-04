@@ -1,56 +1,31 @@
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import BigNumber from 'bignumber.js';
 
 import { Constants } from '../../constants/constants';
 import { NetworkType } from '../../enums/networkTypes';
-import { address, contractDetail, ovenBcdResponse } from '../types';
+import { address, contractDetails, ovenBcdResponse } from '../types';
 
 export class BlockchainIndexerClient {
-  /**
-   * Returns all keys for a given value in a big map.
-   *
-   * @param value Value in the big map.
-   * @param bigMapId ID of the big map.
-   * @param network Network type.
-   */
   public static async getBigMapKeysByValue(
-    value: string,
     bigMapId: BigNumber,
+    value: string,
     network: NetworkType
   ): Promise<ovenBcdResponse[]> {
-    try {
-      const apiInstance = await this.create();
-      const response = await apiInstance.get<ovenBcdResponse[]>(this.getBigMapEndpoint(value, bigMapId, network));
-      const ovenBcdResponse = response.data;
-      return ovenBcdResponse;
-    } catch (err) {
-      if (err & err.response) {
-        const axiosError = err as AxiosError;
-        return axiosError.response?.data;
-      }
-      throw err;
-    }
+    const apiInstance = await this.create();
+    const response = await apiInstance.get<ovenBcdResponse[]>(this.getBigMapEndpoint(value, bigMapId, network));
+    const ovenBcdResponse = response.data;
+    return ovenBcdResponse;
   }
 
-  /**
-   * Returns general information on a smart contract.
-   *
-   * @param address KT1... address of the smart contract.
-   * @param network Network type.
-   */
-  public static async getContractInfo(address: address, network: NetworkType): Promise<contractDetail> {
-    try {
-      const apiInstance = await this.create();
-      const response = await apiInstance.get(this.getContractEndpoint(address, network));
-      const contractInfo = response.data;
-      return contractInfo;
-    } catch (err) {
-      if (err & err.response) {
-        const axiosError = err as AxiosError;
-        return axiosError.response?.data;
-      }
-      throw err;
-    }
+  public static async getContractInfo(address: address, network: NetworkType): Promise<contractDetails> {
+    const apiInstance = await this.create();
+    const response = await apiInstance.get(this.getContractEndpoint(address, network));
+    const contractDetails: contractDetails = {
+      originatedAtDate: response.data.timestamp,
+      originatedAtHeight: response.data.level,
+      lastAction: response.data.last_action,
+    };
+    return contractDetails;
   }
   // TODO
   public static async getContractHistory(address: address, network: NetworkType) {
