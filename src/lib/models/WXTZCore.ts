@@ -3,15 +3,15 @@ import BigNumber from 'bignumber.js';
 
 import { ContractType } from '../../enums/contractTypes';
 import { MichelsonTypes } from '../../enums/michelsonTypes';
-import { AllOvensByOwnerGetter } from '../services/AllOvensByOwnerGetter';
-import { ByteConversionUtils } from '../services/ByteConversionUtils';
-import { DeploymentsPropertyGetter } from '../services/DeploymentsPropertyGetter';
-import { TotalXTZGetter } from '../services/TotalXTZGetter';
+import { getAllOvenAddressesByOwner } from '../services/AllOvensByOwnerGetter';
+import { checkIntegrity, packMichelson, unpack } from '../services/ByteConversionUtils';
+import { getTotalXTZBalance } from '../services/TotalXTZGetter';
 import {
   address,
   arbitraryValue,
   arbitraryValueKey,
   CoreContractStorage,
+  Deployment,
   lambdaName,
   lambdaParameter,
   michelsonType,
@@ -22,26 +22,30 @@ import {
   wXTZConfig,
 } from '../types';
 
-import { WXTZBaseClient } from './WXTZBaseClient';
+import { WXTZBase } from './WXTZBase';
 
-export class WXTZCoreClient extends WXTZBaseClient {
+export class WXTZCore extends WXTZBase<WXTZCore> {
   public instance!: ContractAbstraction<ContractProvider | Wallet>;
 
-  public constructor(coreAddress: address, wXTZConfig: wXTZConfig) {
-    super(coreAddress, wXTZConfig, ContractType.core);
-  }
-
-  public async initialize(): Promise<WXTZCoreClient> {
-    await super.Initialize();
-    return this;
+  public constructor(coreAddress: address, wXTZConfig: wXTZConfig, deployment: Deployment) {
+    super(coreAddress, ContractType.core, wXTZConfig, deployment);
   }
 
   public getCoreAddress(): address {
     return this.instance.address;
   }
 
-  public async getWXTZTokenContractAddress() {
-    return await this.getArbitraryValue('wXTZTokenContractAddress', MichelsonTypes.wXTZTokenContractAddress);
+  public async checkContractCode(): Promise<boolean> {
+    const coreIntegrity = await super.checkContractCode();
+    const lambdaCreateOvenIntegrity = await this.checkCreateOvenCode();
+    return coreIntegrity && lambdaCreateOvenIntegrity;
+  }
+
+  public async getWXTZTokenContractAddress(): Promise<address> {
+    return (await this.getArbitraryValue(
+      'wXTZTokenContractAddress',
+      MichelsonTypes.wXTZTokenContractAddress
+    )) as address;
   }
 
   /**
@@ -55,21 +59,18 @@ export class WXTZCoreClient extends WXTZBaseClient {
     ovenOwner: ovenOwner,
     delegate?: address
   ): Promise<ContractMethod<ContractProvider | Wallet>> {
-    // make sure that the create oven method of the core smart contract passes the checksum
-    if (this.checkIntegrity) await this.verifyCreateOvenMethod();
-
     const lambdaParameter = this.composeLambdaParameterCreateOven(delegate, ovenOwner);
     return this.runEntrypointLambda('createOven', lambdaParameter);
   }
 
   public async getAllOvenAddressesByOwner(ovenOwner: ovenOwner): Promise<string[]> {
     const bigMapId = await this.getBigMapIdOvens();
-    return await AllOvensByOwnerGetter.get(ovenOwner, bigMapId, this.network);
+    return await getAllOvenAddressesByOwner(ovenOwner, bigMapId, this.network);
   }
 
   public async getTotalLockedXTZ(ovenOwner: ovenOwner): Promise<TezosBalance> {
     const allOvenAddresses = await this.getAllOvenAddressesByOwner(ovenOwner);
-    return await TotalXTZGetter.get(allOvenAddresses, this.Tezos);
+    return await getTotalXTZBalance(allOvenAddresses, this.Tezos);
   }
 
   // TODO test
@@ -79,16 +80,16 @@ export class WXTZCoreClient extends WXTZBaseClient {
     return ovenOwner;
   }
 
-  private async verifyCreateOvenMethod(): Promise<boolean> {
-    const checksum = DeploymentsPropertyGetter.getChecksum(ContractType.core, this.network);
+  private async checkCreateOvenCode(): Promise<boolean> {
+    const checksum = this.deployment[ContractType.core].checksum;
     const packedCreateOvenBytes = await this.getPackedLambda('entrypoint/createOven');
-    return await ByteConversionUtils.checkIntegrity(checksum, packedCreateOvenBytes);
+    return await checkIntegrity(checksum, packedCreateOvenBytes);
   }
 
   private composeLambdaParameterCreateOven(delegate: string | undefined, ovenOwner: string) {
     const delegateParameter = delegate !== undefined ? `Some "${delegate}"` : 'None';
     const code = `Pair ${delegateParameter} "${ovenOwner}"`;
-    const lambdaParameter = ByteConversionUtils.packMichelson(code, MichelsonTypes.createOven);
+    const lambdaParameter = packMichelson(code, MichelsonTypes.createOven);
     return lambdaParameter;
   }
 
@@ -106,7 +107,7 @@ export class WXTZCoreClient extends WXTZBaseClient {
 
   private async getArbitraryValue(key: arbitraryValueKey, michelsonType: michelsonType): Promise<arbitraryValue> {
     const packedArbitraryValue = await this.getPackedArbitraryValue(key);
-    return ByteConversionUtils.unpack(packedArbitraryValue, michelsonType);
+    return unpack(packedArbitraryValue, michelsonType);
   }
 
   private async runEntrypointLambda(

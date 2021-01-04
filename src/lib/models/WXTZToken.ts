@@ -1,15 +1,12 @@
 import { Constants } from '../../constants/constants';
 import { ContractType } from '../../enums/contractTypes';
-import { ovenOwner, tokenAddress, TokenContractStorage, WrappedXTZBalance, wXTZConfig } from '../types';
+import { Deployment, ovenOwner, tokenAddress, TokenContractStorage, WrappedXTZBalance, wXTZConfig } from '../types';
 
-import { WXTZBaseClient } from './WXTZBaseClient';
+import { WXTZBase } from './WXTZBase';
 
-export class WXTZTokenClient extends WXTZBaseClient {
-  constructor(tokenAddress: tokenAddress, wXTZConfig: wXTZConfig) {
-    super(tokenAddress, wXTZConfig, ContractType.token);
-  }
-  public async initialize() {
-    super.Initialize();
+export class WXTZToken extends WXTZBase<WXTZToken> {
+  constructor(tokenAddress: tokenAddress, wXTZConfig: wXTZConfig, deployment: Deployment) {
+    super(tokenAddress, ContractType.token, wXTZConfig, deployment);
   }
 
   public async getTotalSupply(): Promise<WrappedXTZBalance> {
