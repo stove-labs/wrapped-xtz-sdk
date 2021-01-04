@@ -1,22 +1,23 @@
 import { TezosToolkit } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 
-import { address, TezosBalance } from '../../types/types';
+import { address, TezosBalance } from '../types';
 
-export class TotalXTZGetter {
-  public static async get(tezosAddresses: address[], tezosToolkitInstance: TezosToolkit): Promise<TezosBalance> {
-    const balances: TezosBalance[] = await this.getBalances(tezosAddresses, tezosToolkitInstance);
+export async function getTotalXTZBalance(
+  tezosAddresses: address[],
+  tezosToolkitInstance: TezosToolkit
+): Promise<TezosBalance> {
+  const balances: TezosBalance[] = await getBalances(tezosAddresses, tezosToolkitInstance);
 
-    return this.sumBalances(balances);
-  }
+  return sumBalances(balances);
+}
 
-  private static async getBalances(ovens: address[], Tezos: TezosToolkit): Promise<TezosBalance[]> {
-    const balancePromises = ovens.map((address) => Tezos.tz.getBalance(address));
+async function getBalances(ovens: address[], Tezos: TezosToolkit): Promise<TezosBalance[]> {
+  const balancePromises = ovens.map((address) => Tezos.tz.getBalance(address));
 
-    return await Promise.all(balancePromises);
-  }
+  return await Promise.all(balancePromises);
+}
 
-  private static sumBalances(balances: TezosBalance[]): TezosBalance {
-    return balances.reduce((totalBalance, balance) => totalBalance.plus(balance), new BigNumber(0));
-  }
+function sumBalances(balances: TezosBalance[]): TezosBalance {
+  return balances.reduce((totalBalance, balance) => totalBalance.plus(balance), new BigNumber(0));
 }
