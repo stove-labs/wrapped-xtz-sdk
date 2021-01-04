@@ -31,12 +31,29 @@ export type michelsonType = string;
 export type wXTZConfig = {
   tezos: TezosToolkit;
   network: NetworkType;
-  checkIntegrity?: boolean;
 };
 
 export type packedLambda = bytes;
 
 export declare type micheline = string;
+
+export type ContractDeployment = {
+  checksum: string;
+  address?: address;
+};
+
+export type Deployment = {
+  core: ContractDeployment;
+  oven: ContractDeployment;
+  token: ContractDeployment;
+  lambdaCreateOven: ContractDeployment;
+};
+
+export type Deployments = {
+  mainnet: Deployment;
+  delphinet: Deployment;
+  localhost: Deployment;
+};
 
 /**
  * Models: WXTZ Core, Oven, Token
@@ -80,13 +97,18 @@ export declare type contractInfoFromRpc = {
   };
 };
 
-export declare type contractDetail = {
-  timestamp: string;
-  level: blockHeight;
-  last_action: string;
+/**
+ * @originatedAtDate Time and date of oven creation.
+ * @originatedAtHeight Block height of oven creation.
+ * @lastAction Time and date of last oven action.
+ */
+export type contractDetails = {
+  originatedAtDate: string;
+  originatedAtHeight: blockHeight;
+  lastAction: string;
 };
 
-export declare type ovenBcdResponse = {
+export type ovenBcdResponse = {
   data: {
     key_string: address;
     level: blockHeight;

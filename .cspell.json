@@ -33,7 +33,8 @@
         "transpiled",
         "typedoc",
         "untracked",
-        "wxtz"
+        "wxtz",
+        "WXTZSDK"
     ],
     "flagWords": [],
     "ignorePaths": [
