@@ -3,7 +3,7 @@
   "extension": ["ts"],
   "package": "./package.json",
   "slow": 75,
-  "timeout": 20000,
+  "timeout": 50000,
   "ui": "bdd",
-  "watch-files": ["./src/**/*.ts", "test/**/*"]
+  "watch-files": ["src/**/*", "test/**/*"]
 }
