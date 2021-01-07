@@ -1,4 +1,6 @@
-# wxtz-sdk
+![Delphinet](https://github.com/stove-labs/wrapped-xtz-sdk/workflows/Delphinet/badge.svg)
+
+# wXTZ SDK
 
 SDK for the wrapped XTZ project
 
