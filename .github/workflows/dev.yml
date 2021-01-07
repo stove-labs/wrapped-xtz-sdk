@@ -24,5 +24,9 @@ jobs:
         node-version: 10.x
     - run: npm ci
     - run: npm run sandbox:start
+    - name: Wait 20 seconds for sandbox
+      uses: jakejarvis/wait-action@master
+      with:
+        time: '20s'
     - run: npm run test:migrate
     - run: npm run test
