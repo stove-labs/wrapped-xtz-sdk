@@ -1,17 +1,17 @@
 import { ContractAbstraction, ContractProvider, TezosToolkit, Wallet } from '@taquito/taquito';
 
-import { ContractType } from '../../enums/contractTypes';
-import { NetworkType } from '../../enums/networkTypes';
-import { checkIntegrity } from '../services/ByteConversionUtils';
-import { address, Deployment, wXTZConfig } from '../types';
+import { ContractType, NetworkType } from './enums';
+import { checkIntegrity } from './services/ByteConversionUtils';
+import { address, Deployment, wXTZConfig } from './types';
 
 export abstract class WXTZBase<T> {
+  public readonly indexerUrl: string;
   protected instance!: ContractAbstraction<ContractProvider | Wallet>;
   protected Tezos: TezosToolkit;
   protected network: NetworkType;
+  protected readonly deployment: Deployment;
   private readonly contractType: ContractType;
   private readonly address;
-  protected readonly deployment: Deployment;
 
   constructor(address: address, contractType: ContractType, wXTZConfig: wXTZConfig, deployment: Deployment) {
     this.address = address;
@@ -19,6 +19,7 @@ export abstract class WXTZBase<T> {
     this.network = wXTZConfig.network;
     this.contractType = contractType;
     this.deployment = deployment;
+    this.indexerUrl = wXTZConfig.indexerUrl;
   }
 
   public async initialize(): Promise<WXTZBase<T>> {

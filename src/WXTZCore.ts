@@ -1,11 +1,11 @@
 import { ContractAbstraction, ContractMethod, ContractProvider, Wallet } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 
-import { ContractType } from '../../enums/contractTypes';
-import { MichelsonTypes } from '../../enums/michelsonTypes';
-import { getAllOvenAddressesByOwner } from '../services/AllOvensByOwnerGetter';
-import { checkIntegrity, packMichelson, unpack } from '../services/ByteConversionUtils';
-import { getTotalXTZBalance } from '../services/TotalXTZGetter';
+import { WXTZBase } from './WXTZBase';
+import { ContractType, MichelsonType } from './enums';
+import { getAllOvenAddressesByOwner } from './services/AllOvensByOwnerGetter';
+import { checkIntegrity, packMichelson, unpack } from './services/ByteConversionUtils';
+import { getTotalXTZBalance } from './services/TotalXTZGetter';
 import {
   address,
   arbitraryValue,
@@ -20,9 +20,7 @@ import {
   packedLambda,
   TezosBalance,
   wXTZConfig,
-} from '../types';
-
-import { WXTZBase } from './WXTZBase';
+} from './types';
 
 export class WXTZCore extends WXTZBase<WXTZCore> {
   public instance!: ContractAbstraction<ContractProvider | Wallet>;
@@ -44,7 +42,7 @@ export class WXTZCore extends WXTZBase<WXTZCore> {
   public async getWXTZTokenContractAddress(): Promise<address> {
     return (await this.getArbitraryValue(
       'wXTZTokenContractAddress',
-      MichelsonTypes.wXTZTokenContractAddress
+      MichelsonType.wXTZTokenContractAddress
     )) as address;
   }
 
@@ -65,7 +63,7 @@ export class WXTZCore extends WXTZBase<WXTZCore> {
 
   public async getAllOvenAddressesByOwner(ovenOwner: ovenOwner): Promise<string[]> {
     const bigMapId = await this.getBigMapIdOvens();
-    return await getAllOvenAddressesByOwner(ovenOwner, bigMapId, this.network);
+    return await getAllOvenAddressesByOwner(ovenOwner, bigMapId, this.indexerUrl, this.network);
   }
 
   public async getTotalLockedXTZ(ovenOwner: ovenOwner): Promise<TezosBalance> {
@@ -89,7 +87,7 @@ export class WXTZCore extends WXTZBase<WXTZCore> {
   private composeLambdaParameterCreateOven(delegate: string | undefined, ovenOwner: string) {
     const delegateParameter = delegate !== undefined ? `Some "${delegate}"` : 'None';
     const code = `Pair ${delegateParameter} "${ovenOwner}"`;
-    const lambdaParameter = packMichelson(code, MichelsonTypes.createOven);
+    const lambdaParameter = packMichelson(code, MichelsonType.createOven);
     return lambdaParameter;
   }
 

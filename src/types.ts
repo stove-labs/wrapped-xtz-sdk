@@ -1,7 +1,7 @@
 import { TezosToolkit } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 
-import { NetworkType } from '../enums/networkTypes';
+import { NetworkType } from './enums';
 
 export type address = string;
 export type ovenOwner = address;
@@ -31,6 +31,7 @@ export type michelsonType = string;
 export type wXTZConfig = {
   tezos: TezosToolkit;
   network: NetworkType;
+  indexerUrl: string;
 };
 
 export type packedLambda = bytes;

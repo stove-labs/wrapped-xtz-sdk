@@ -1,7 +1,8 @@
 import { ContractMethod, ContractProvider, UnitValue, Wallet } from '@taquito/taquito';
 
-import { ContractType } from '../../enums/contractTypes';
-import { BlockchainIndexerClient } from '../services/BlockchainIndexerClient';
+import { WXTZBase } from './WXTZBase';
+import { ContractType } from './enums';
+import { getContractHistory, getContractInfo } from './services/BlockchainIndexer';
 import {
   address,
   contractDetails,
@@ -11,9 +12,7 @@ import {
   OvenContractStorage,
   TezosBalance,
   wXTZConfig,
-} from '../types';
-
-import { WXTZBase } from './WXTZBase';
+} from './types';
 
 export class WXTZOven extends WXTZBase<WXTZOven> {
   constructor(ovenAddress: address, wXTZConfig: wXTZConfig, deployment: Deployment) {
@@ -37,11 +36,12 @@ export class WXTZOven extends WXTZBase<WXTZOven> {
   }
 
   public async getDetails(): Promise<contractDetails> {
-    return await BlockchainIndexerClient.getContractInfo(this.getAddress(), this.network);
+    return await getContractInfo(this.getAddress(), this.indexerUrl, this.network);
   }
 
+  // TODO
   public async getLastStates(): Promise<any> {
-    return await BlockchainIndexerClient.getContractHistory(this.getAddress(), this.network);
+    return await getContractHistory(this.getAddress(), this.indexerUrl, this.network);
   }
 
   /**

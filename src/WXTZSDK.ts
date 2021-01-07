@@ -1,9 +1,8 @@
-import defaultDeployments from '../../defaultConfig/deployments.json';
-import { address, Deployment, WrappedXTZBalance, wXTZConfig } from '../types';
-
 import { WXTZCore } from './WXTZCore';
 import { WXTZOven } from './WXTZOven';
 import { WXTZToken } from './WXTZToken';
+import defaultDeployments from './deployments.json';
+import { address, Deployment, WrappedXTZBalance, wXTZConfig } from './types';
 
 export class WXTZSDK extends WXTZCore {
   public deployment: Deployment;

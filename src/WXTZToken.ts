@@ -1,8 +1,7 @@
-import { Constants } from '../../constants/constants';
-import { ContractType } from '../../enums/contractTypes';
-import { Deployment, ovenOwner, tokenAddress, TokenContractStorage, WrappedXTZBalance, wXTZConfig } from '../types';
-
 import { WXTZBase } from './WXTZBase';
+import { ContractType } from './enums';
+import { Deployment, ovenOwner, tokenAddress, TokenContractStorage, WrappedXTZBalance, wXTZConfig } from './types';
+import { defaultBalance } from './tzip7Constants';
 
 export class WXTZToken extends WXTZBase<WXTZToken> {
   constructor(tokenAddress: tokenAddress, wXTZConfig: wXTZConfig, deployment: Deployment) {
@@ -15,7 +14,7 @@ export class WXTZToken extends WXTZBase<WXTZToken> {
 
   // if no balance found for given token owner, return default balance of 0
   public async getWXTZBalance(ovenOwner: ovenOwner): Promise<WrappedXTZBalance> {
-    const balance = (await this.getStorage()).token.ledger.get(ovenOwner) || Constants.defaultBalance;
+    const balance = (await this.getStorage()).token.ledger.get(ovenOwner) || defaultBalance;
     return balance;
   }
 
