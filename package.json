@@ -1,5 +1,5 @@
 {
-  "name": "wxtz-sdk",
+  "name": "@stove-labs/wxtz-sdk",
   "version": "1.0.0",
   "description": "SDK for the wrapped XTZ project",
   "main": "build/main/index.js",
@@ -41,7 +41,8 @@
     "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "version": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && npm i",
-    "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish"
+    "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish",
+    "update-readme-code-snippets": "npx embedme README.md"
   },
   "engines": {
     "node": ">=10"
