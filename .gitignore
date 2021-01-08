@@ -6,6 +6,7 @@ src/**.js
 coverage
 *.log
 yarn.lock
+scripts/tools/sandbox/*
 
 ### OSX ###
 # General
