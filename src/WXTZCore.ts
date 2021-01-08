@@ -1,11 +1,10 @@
 import { ContractAbstraction, ContractMethod, ContractProvider, Wallet } from '@taquito/taquito';
 import BigNumber from 'bignumber.js';
 
+import { BCDApi } from './BCDApi';
 import { WXTZBase } from './WXTZBase';
+import { checkIntegrity, packMichelson, unpack } from './byteHelpers';
 import { ContractType, MichelsonType } from './enums';
-import { getAllOvenAddressesByOwner } from './services/AllOvensByOwnerGetter';
-import { checkIntegrity, packMichelson, unpack } from './services/ByteConversionUtils';
-import { getTotalXTZBalance } from './services/TotalXTZGetter';
 import {
   address,
   arbitraryValue,
@@ -24,9 +23,11 @@ import {
 
 export class WXTZCore extends WXTZBase<WXTZCore> {
   public instance!: ContractAbstraction<ContractProvider | Wallet>;
+  private BCDApi: BCDApi;
 
   public constructor(coreAddress: address, wXTZConfig: wXTZConfig, deployment: Deployment) {
     super(coreAddress, ContractType.core, wXTZConfig, deployment);
+    this.BCDApi = new BCDApi(wXTZConfig.indexerUrl, wXTZConfig.network);
   }
 
   public getCoreAddress(): address {
@@ -61,14 +62,16 @@ export class WXTZCore extends WXTZBase<WXTZCore> {
     return this.runEntrypointLambda('createOven', lambdaParameter);
   }
 
-  public async getAllOvenAddressesByOwner(ovenOwner: ovenOwner): Promise<string[]> {
+  public async getAllOvenAddressesByOwner(ovenOwner: ovenOwner): Promise<address[]> {
     const bigMapId = await this.getBigMapIdOvens();
-    return await getAllOvenAddressesByOwner(ovenOwner, bigMapId, this.indexerUrl, this.network);
+
+    return await this.BCDApi.getOvenAddressByOwner(bigMapId, ovenOwner);
   }
 
   public async getTotalLockedXTZ(ovenOwner: ovenOwner): Promise<TezosBalance> {
     const allOvenAddresses = await this.getAllOvenAddressesByOwner(ovenOwner);
-    return await getTotalXTZBalance(allOvenAddresses, this.Tezos);
+
+    return await this.getTotalXTZBalance(allOvenAddresses);
   }
 
   // TODO test
@@ -117,5 +120,21 @@ export class WXTZCore extends WXTZBase<WXTZCore> {
 
   private async getBigMapIdOvens(): Promise<BigNumber> {
     return (await this.getStorage()).ovens.id;
+  }
+
+  private async getTotalXTZBalance(addresses: address[]): Promise<TezosBalance> {
+    const balances: TezosBalance[] = await this.getBalances(addresses);
+
+    return this.sumBalances(balances);
+  }
+
+  private async getBalances(addresses: address[]): Promise<TezosBalance[]> {
+    const balancePromises = addresses.map((address) => this.Tezos.tz.getBalance(address));
+
+    return await Promise.all(balancePromises);
+  }
+
+  private sumBalances(balances: TezosBalance[]): TezosBalance {
+    return balances.reduce((totalBalance, balance) => totalBalance.plus(balance), new BigNumber(0));
   }
 }

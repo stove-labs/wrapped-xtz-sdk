@@ -1,7 +1,7 @@
 import { WXTZBase } from './WXTZBase';
+import { defaultBalance } from './constants';
 import { ContractType } from './enums';
 import { Deployment, ovenOwner, tokenAddress, TokenContractStorage, WrappedXTZBalance, wXTZConfig } from './types';
-import { defaultBalance } from './tzip7Constants';
 
 export class WXTZToken extends WXTZBase<WXTZToken> {
   constructor(tokenAddress: tokenAddress, wXTZConfig: wXTZConfig, deployment: Deployment) {

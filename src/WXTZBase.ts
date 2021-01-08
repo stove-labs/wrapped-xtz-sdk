@@ -1,7 +1,7 @@
 import { ContractAbstraction, ContractProvider, TezosToolkit, Wallet } from '@taquito/taquito';
 
+import { checkIntegrity } from './byteHelpers';
 import { ContractType, NetworkType } from './enums';
-import { checkIntegrity } from './services/ByteConversionUtils';
 import { address, Deployment, wXTZConfig } from './types';
 
 export abstract class WXTZBase<T> {

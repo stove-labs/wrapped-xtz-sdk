@@ -1,7 +1,7 @@
 import { binToHex, instantiateSha256, utf8ToBin } from '@bitauth/libauth';
 import { TezosMessageUtils, TezosParameterFormat } from 'conseiljs';
 
-import { arbitraryValue, michelsonType, packedLambda } from '../types';
+import { arbitraryValue, michelsonType, packedLambda } from './types';
 
 export function unpack(packedLambda: packedLambda, michelsonType?: michelsonType): arbitraryValue {
   if (michelsonType === undefined) {

@@ -1,8 +1,8 @@
 import { ContractMethod, ContractProvider, UnitValue, Wallet } from '@taquito/taquito';
 
+import { BCDApi } from './BCDApi';
 import { WXTZBase } from './WXTZBase';
 import { ContractType } from './enums';
-import { getContractHistory, getContractInfo } from './services/BlockchainIndexer';
 import {
   address,
   contractDetails,
@@ -15,8 +15,11 @@ import {
 } from './types';
 
 export class WXTZOven extends WXTZBase<WXTZOven> {
+  private BCDApi: BCDApi;
+
   constructor(ovenAddress: address, wXTZConfig: wXTZConfig, deployment: Deployment) {
     super(ovenAddress, ContractType.oven, wXTZConfig, deployment);
+    this.BCDApi = new BCDApi(wXTZConfig.indexerUrl, wXTZConfig.network);
   }
 
   public async getCoreAddress(): Promise<address> {
@@ -36,12 +39,12 @@ export class WXTZOven extends WXTZBase<WXTZOven> {
   }
 
   public async getDetails(): Promise<contractDetails> {
-    return await getContractInfo(this.getAddress(), this.indexerUrl, this.network);
+    return await this.BCDApi.getContractInfo(this.getAddress());
   }
 
   // TODO
   public async getLastStates(): Promise<any> {
-    return await getContractHistory(this.getAddress(), this.indexerUrl, this.network);
+    return await this.BCDApi.getContractHistory(this.getAddress());
   }
 
   /**
