@@ -6,6 +6,7 @@ import { address, Deployment, WrappedXTZBalance, wXTZConfig } from './types';
 
 export class WXTZSDK extends WXTZCore {
   public deployment: Deployment;
+  // TODO avoid force unwrap
   public token!: WXTZToken;
   private wXTZConfig: wXTZConfig;
 
@@ -17,7 +18,7 @@ export class WXTZSDK extends WXTZCore {
     this.wXTZConfig = wXTZConfig;
   }
 
-  oven(ovenAddress: address): WXTZOven {
+  public oven(ovenAddress: address): WXTZOven {
     return new WXTZOven(ovenAddress, this.wXTZConfig, this.deployment);
   }
 
@@ -46,7 +47,7 @@ export class WXTZSDK extends WXTZCore {
     return this.token.getTotalSupply();
   }
 
-  public async getWXTZBalance(ovenOwner: address): Promise<WrappedXTZBalance> {
+  public async getBalance(ovenOwner: address): Promise<WrappedXTZBalance> {
     return this.token.getWXTZBalance(ovenOwner);
   }
 }

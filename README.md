@@ -1,4 +1,4 @@
-![Delphinet](https://github.com/stove-labs/wrapped-xtz-sdk/workflows/Delphinet/badge.svg)
+# Wrapped-XTZ SDK
 
 # wXTZ SDK
 
@@ -12,60 +12,45 @@ npm run test:migrate
 npm run test
 ```
 
-## Usage
+# Quickstart
 
-### Typescript
+## TypeScript
 
-```ts
-// examples/typescript/example.ts
-
-import { WXTZOven, WXTZSDK, NetworkType } from 'wxtz-sdk';
+```typescript
+import { WXTZOven, WXTZSDK, NetworkType } from '@stove-labs/wrapped-xtz-sdk';
 import { InMemorySigner } from '@taquito/signer';
 import { TezosToolkit } from '@taquito/taquito';
 
-const Tezos = new TezosToolkit('tezos rpc url');
+const Tezos = new TezosToolkit("tezos rpc url");
 Tezos.setProvider({
-  signer: new InMemorySigner('signer secret key'),
+    signer: new InMemorySigner(signerSk),
 });
 
 const wXTZConfig = {
-  tezos: Tezos,
-  network: NetworkType.delphinet,
-  indexerUrl: 'https://you.better-call.dev',
+    tezos: Tezos,
+    network: NetworkType.delphinet,
+    indexerUrl: 'https://you.better-call.dev',
 };
 
-(async function () {
-  const wXTZ = await WXTZSDK.at('KT1coreAddress', wXTZConfig);
-  const createOvenOperation = await wXTZ.createOven('tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6');
-  await createOvenOperation.send();
+(async function() {
+    const wXTZ = await WXTZSDK.at('KT1coreAddress', wXTZConfig);
+    const createOvenOperation = wXTZ.createOven('tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6');
+    await createOvenOperation.send();
+    await createOvenOperation.confirmation(1);
 })();
 
 ```
 
-### Javascript
+## License 📃
 
-```js
-// examples/typescript/example.js
+Wrapped-XTZ SDK is available under the MIT License
 
-const { WXTZOven, WXTZSDK, NetworkType } = require('wxtz-sdk');
-const { InMemorySigner } = require('@taquito/signer');
-const { TezosToolkit } = require('@taquito/taquito');
+## Powered by
 
-const Tezos = new TezosToolkit('tezos rpc url');
-Tezos.setProvider({
-  signer: new InMemorySigner('signer secret key'),
-});
-
-const wXTZConfig = {
-  tezos: Tezos,
-  network: NetworkType.delphinet,
-  indexerUrl: 'https://you.better-call.dev',
-};
-
-(async function () {
-  const wXTZ = await WXTZSDK.at('KT1coreAddress', wXTZConfig);
-  const createOvenOperation = await wXTZ.createOven('tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6');
-  await createOvenOperation.send();
-})();
-
-```
+<div float="left">
+  <img src="https://ligolang.org/img/logo.svg" width="100" />
+  <img src="https://stove-labs.com/logo_transparent.png" width="100" />
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png" width="100" /> 
+  <img src="https://raw.githubusercontent.com/remojansen/logo.ts/master/ts.png" width="100" /> 
+</div>
+<br/>
