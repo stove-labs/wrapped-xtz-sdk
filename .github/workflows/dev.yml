@@ -1,32 +1,28 @@
 name: Delphinet
 
 on:
-  # Triggers the workflow on push or pull request events but only for the dev branch
   push:
-    branches: [ dev ]
+    branches: [dev]
   pull_request:
-    branches: [ dev ]
+    branches: [dev]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-   test:
+  test:
     runs-on: ubuntu-latest
-    steps:      
-    - uses: actions/checkout@v2
-  
-    - name: Use Node.js 10.x
-      uses: actions/setup-node@v1
-      with:
-        node-version: 10.x
-    - run: npm ci
-    - run: npm run sandbox:start
-    - name: Wait 20 seconds for sandbox
-      uses: jakejarvis/wait-action@master
-      with:
-        time: '20s'
-    - run: npm run test:migrate
-    - run: npm run test
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 10.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+      - run: npm ci
+      - run: npm run sandbox:start
+      - name: Wait 20 seconds for sandbox
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '20s'
+      - run: npm run test:migrate
+      - run: npm run test
