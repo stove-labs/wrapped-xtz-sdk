@@ -2,7 +2,7 @@
 
 This SDK for TypeScript and JavaScript enables you to interact with Tezos smart contracts of the [Wrapped-XTZ](https://github.com/stakerdao/wrapped-xtz) project by StakerDAO.
 
-> 🚧 This software is under development and not yet published. Below are the instructions to build it locally. 🚧
+> 🚧 This software is still under development and not released. 🚧
 
 ```sh
 git clone https://github.com/stove-labs/wrapped-xtz-sdk folder-name
@@ -106,6 +106,7 @@ const wXTZConfig = {
 ## Tests 🧪
 
 For running tests it is necessary to spin up a local Tezos sandbox node, migrating the test state and then executing the test runner. 
+Make sure to have [Docker](https://www.docker.com) running, [node.js v12.x](https://nodejs.org) and [jq](https://stedolan.github.io/jq/) installed.
 
 ```sh
 npm run sandbox:start
@@ -116,7 +117,7 @@ npm run test
 
 Wrapped-XTZ SDK is available under the MIT License.
 
-## Powered 🔋 by
+## Powered by
 
 <div float="left">
   <img src="https://ligolang.org/img/logo.svg" width="100" />
