@@ -31,7 +31,7 @@ export abstract class WXTZBase<T> {
     return this.instance.address;
   }
 
-  public async checkContractCode(): Promise<boolean> {
+  public async checkContractCodeIntegrity(): Promise<boolean> {
     const contractCode = (await this.Tezos.rpc.getScript(this.address)).code;
     const contractCodeString = JSON.stringify(contractCode);
     const checksum = this.deployment[this.contractType].checksum;

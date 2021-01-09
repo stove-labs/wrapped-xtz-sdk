@@ -44,7 +44,7 @@ describe('WXTZOven.ts', () => {
       });
 
       it('can check for correct contract code', async () => {
-        const isValidCode = await wXTZOven.checkContractCode();
+        const isValidCode = await wXTZOven.checkContractCodeIntegrity();
 
         expect(isValidCode).to.be.true;
       });

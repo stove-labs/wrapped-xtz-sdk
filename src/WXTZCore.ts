@@ -34,9 +34,9 @@ export class WXTZCore extends WXTZBase<WXTZCore> {
     return this.instance.address;
   }
 
-  public async checkContractCode(): Promise<boolean> {
-    const coreIntegrity = await super.checkContractCode();
-    const lambdaCreateOvenIntegrity = await this.checkCreateOvenCode();
+  public async checkContractCodeIntegrity(): Promise<boolean> {
+    const coreIntegrity = await super.checkContractCodeIntegrity();
+    const lambdaCreateOvenIntegrity = await this.checkCreateOvenCodeIntegrity();
     return coreIntegrity && lambdaCreateOvenIntegrity;
   }
 
@@ -65,7 +65,7 @@ export class WXTZCore extends WXTZBase<WXTZCore> {
   public async getAllOvenAddressesByOwner(ovenOwner: ovenOwner): Promise<address[]> {
     const bigMapId = await this.getBigMapIdOvens();
 
-    return await this.BCDApi.getOvenAddressByOwner(bigMapId, ovenOwner);
+    return await this.BCDApi.getOvenAddressesByOwner(bigMapId, ovenOwner);
   }
 
   public async getTotalLockedXTZ(ovenOwner: ovenOwner): Promise<TezosBalance> {
@@ -81,7 +81,7 @@ export class WXTZCore extends WXTZBase<WXTZCore> {
     return ovenOwner;
   }
 
-  private async checkCreateOvenCode(): Promise<boolean> {
+  private async checkCreateOvenCodeIntegrity(): Promise<boolean> {
     const checksum = this.deployment[ContractType.core].checksum;
     const packedCreateOvenBytes = await this.getPackedLambda('entrypoint/createOven');
     return await checkIntegrity(checksum, packedCreateOvenBytes);

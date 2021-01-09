@@ -1,7 +1,7 @@
-import deployments from '../../../src/deployments.json';
-import { packMichelson, checkIntegrity } from '../../../src/services/ByteConversionUtils';
+import deployments from '../../src/deployments.json';
+import { packMichelson, checkIntegrity } from '../../src/byteHelpers';
 import { expect } from 'chai';
-import test from '../../config';
+import test from '../config';
 
 describe('BytesConversionUtils.ts', () => {
   it('can pack a create oven instruction', () => {

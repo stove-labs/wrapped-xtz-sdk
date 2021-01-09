@@ -7,7 +7,7 @@ import { address, contractDetails, ovenBcdResponse } from './types';
 export class BCDApi {
   constructor(private indexerUrl: string, private network: NetworkType) {}
 
-  public async getOvenAddressByOwner(bigMapId: BigNumber, value: string): Promise<address[]> {
+  public async getOvenAddressesByOwner(bigMapId: BigNumber, value: string): Promise<address[]> {
     const response = await axios.get<ovenBcdResponse[]>(this.indexerUrl + this.getBigMapEndpoint(value, bigMapId));
     const ovenBcdResponse = response.data;
 
