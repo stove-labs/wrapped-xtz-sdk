@@ -105,7 +105,9 @@ const wXTZConfig = {
   const ovenDetails = await wXTZOven.getDetails();
 })();
 ```
+## API Reference
 
+Checkout the complete TypeDoc [API reference](https://stove-labs.github.io/wrapped-xtz-sdk/https://stove-labs.github.io/wrapped-xtz-sdk/).
 ## Tests 🧪
 
 For running tests it is necessary to spin up a local Tezos sandbox node, migrating the test state and then executing the test runner. 
