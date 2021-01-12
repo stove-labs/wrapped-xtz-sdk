@@ -1,4 +1,6 @@
 ![Delphinet](https://github.com/stove-labs/wrapped-xtz-sdk/workflows/Delphinet/badge.svg)
+[![Made with TypeScript](https://img.shields.io/badge/made_with-TypeScript-blue.svg)](https://www.typescriptlang.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 # Wrapped-XTZ SDK
 
 This SDK for TypeScript and JavaScript enables you to interact with Tezos smart contracts of the [Wrapped-XTZ](https://github.com/stakerdao/wrapped-xtz) project by StakerDAO.
