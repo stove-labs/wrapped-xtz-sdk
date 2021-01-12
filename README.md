@@ -107,7 +107,7 @@ const wXTZConfig = {
 ```
 ## API Reference
 
-Checkout the complete TypeDoc [API reference](https://stove-labs.github.io/wrapped-xtz-sdk/https://stove-labs.github.io/wrapped-xtz-sdk/).
+Checkout the complete TypeDoc [API reference](https://stove-labs.github.io/wrapped-xtz-sdk).
 ## Tests 🧪
 
 For running tests it is necessary to spin up a local Tezos sandbox node, migrating the test state and then executing the test runner. 
