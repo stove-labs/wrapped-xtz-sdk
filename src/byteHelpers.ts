@@ -1,13 +1,13 @@
 import { binToHex, instantiateSha256, utf8ToBin } from '@bitauth/libauth';
 import { TezosMessageUtils, TezosParameterFormat } from 'conseiljs';
 
+import { MichelsonType } from './enums';
 import { arbitraryValue, michelsonType, packedLambda } from './types';
 
 export function unpack(packedLambda: packedLambda, michelsonType?: michelsonType): arbitraryValue {
-  if (michelsonType === undefined) {
-    michelsonType = '';
-  }
-  return TezosMessageUtils.readPackedData(packedLambda, michelsonType);
+  const michelsonTypeForReading = michelsonType !== undefined ? michelsonType : MichelsonType.empty;
+
+  return TezosMessageUtils.readPackedData(packedLambda, michelsonTypeForReading);
 }
 
 export function packMichelson(code: string, type: string) {
