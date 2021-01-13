@@ -120,5 +120,8 @@
       "**/*.spec.js"
     ]
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "istvan.deak@stove-labs.com"
 }
