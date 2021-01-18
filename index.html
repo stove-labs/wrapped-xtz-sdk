@@ -71,69 +71,41 @@
 					<h1>Wrapped-XTZ SDK</h1>
 				</a>
 				<p>This SDK for TypeScript and JavaScript enables you to interact with Tezos smart contracts of the <a href="https://github.com/stakerdao/wrapped-xtz">Wrapped-XTZ</a> project by StakerDAO.</p>
-				<blockquote>
-					<p>🚧 This software is still under development and not released. 🚧</p>
-				</blockquote>
-				<pre><code class="language-sh">git <span class="hljs-built_in">clone</span> https://github.com/stove-labs/wrapped-xtz-sdk folder-name
-<span class="hljs-built_in">cd</span> folder-name
-npm install
-npm run build</code></pre>
 				<a href="#quickstart-🪄" id="quickstart-🪄" style="color: inherit; text-decoration: none;">
 					<h1>Quickstart 🪄</h1>
 				</a>
-				<a href="#import" id="import" style="color: inherit; text-decoration: none;">
-					<h2>Import</h2>
-				</a>
-				<a href="#typescript" id="typescript" style="color: inherit; text-decoration: none;">
-					<h3>TypeScript</h3>
-				</a>
-				<!-- embedme examples/typescript/example.ts#L1-L14 -->
-				<pre><code class="language-ts"><span class="hljs-keyword">import</span> { WXTZSDK, NetworkType } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;wxtz-sdk&#x27;</span>;
-<span class="hljs-keyword">import</span> { InMemorySigner } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@taquito/signer&#x27;</span>;
-<span class="hljs-keyword">import</span> { TezosToolkit } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@taquito/taquito&#x27;</span>;
-
-<span class="hljs-keyword">const</span> Tezos = <span class="hljs-keyword">new</span> TezosToolkit(<span class="hljs-string">&#x27;tezos rpc url&#x27;</span>);
-Tezos.setProvider({
-  <span class="hljs-attr">signer</span>: <span class="hljs-keyword">new</span> InMemorySigner(<span class="hljs-string">&#x27;signer secret key&#x27;</span>),
-});
-
-<span class="hljs-keyword">const</span> wXTZConfig = {
-  <span class="hljs-attr">tezos</span>: Tezos,
-  <span class="hljs-attr">network</span>: NetworkType.delphinet,
-  <span class="hljs-attr">indexerUrl</span>: <span class="hljs-string">&#x27;https://you.better-call.dev&#x27;</span>,
-};</code></pre>
-				<a href="#javascript" id="javascript" style="color: inherit; text-decoration: none;">
-					<h3>JavaScript</h3>
-				</a>
-				<!-- embedme examples/typescript/example.js#L1-L14 -->
-				<pre><code class="language-js"><span class="hljs-keyword">const</span> { WXTZSDK, NetworkType } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;wxtz-sdk&#x27;</span>);
-<span class="hljs-keyword">const</span> { InMemorySigner } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;@taquito/signer&#x27;</span>);
-<span class="hljs-keyword">const</span> { TezosToolkit } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;@taquito/taquito&#x27;</span>);
-
-<span class="hljs-keyword">const</span> Tezos = <span class="hljs-keyword">new</span> TezosToolkit(<span class="hljs-string">&#x27;tezos rpc url&#x27;</span>);
-Tezos.setProvider({
-  <span class="hljs-attr">signer</span>: <span class="hljs-keyword">new</span> InMemorySigner(<span class="hljs-string">&#x27;signer secret key&#x27;</span>),
-});
-
-<span class="hljs-keyword">const</span> wXTZConfig = {
-  <span class="hljs-attr">tezos</span>: Tezos,
-  <span class="hljs-attr">network</span>: NetworkType.delphinet,
-  <span class="hljs-attr">indexerUrl</span>: <span class="hljs-string">&#x27;https://you.better-call.dev&#x27;</span>,
-};</code></pre>
+				<pre><code class="language-sh">npm install @stove-labs/wxtz-sdk</code></pre>
 				<a href="#usage-🕹" id="usage-🕹" style="color: inherit; text-decoration: none;">
 					<h2>Usage 🕹</h2>
 				</a>
-				<a href="#typescript-1" id="typescript-1" style="color: inherit; text-decoration: none;">
+				<a href="#typescript" id="typescript" style="color: inherit; text-decoration: none;">
 					<h3>Typescript</h3>
 				</a>
-				<!-- embedme examples/typescript/example.ts#L16-L59 -->
-				<pre><code class="language-ts">(<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+				<!-- embedme examples/typescript/example.ts -->
+				<pre><code class="language-ts"><span class="hljs-keyword">import</span> { WXTZSDK, NetworkType } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@stove-labs/wxtz-sdk&#x27;</span>;
+<span class="hljs-keyword">import</span> { InMemorySigner } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@taquito/signer&#x27;</span>;
+<span class="hljs-keyword">import</span> { TezosToolkit } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@taquito/taquito&#x27;</span>;
+
+<span class="hljs-keyword">const</span> Tezos = <span class="hljs-keyword">new</span> TezosToolkit(<span class="hljs-string">&#x27;https://testnet-tezos.giganode.io&#x27;</span>);
+Tezos.setProvider({
+  <span class="hljs-attr">signer</span>: <span class="hljs-keyword">new</span> InMemorySigner(
+    <span class="hljs-string">&#x27;edskSAVepaB1qJvJBrR9WK3X6JQneSGq2wf4jF4czWjMF3LyqtyELhGxqmx9gBADquKHr12uYpsDJA1H1RQJNBUUjkefytWs6e&#x27;</span>
+  ),
+});
+
+<span class="hljs-keyword">const</span> wXTZConfig = {
+  <span class="hljs-attr">tezos</span>: Tezos,
+  <span class="hljs-attr">network</span>: NetworkType.delphinet,
+  <span class="hljs-attr">indexerUrl</span>: <span class="hljs-string">&#x27;https://you.better-call.dev&#x27;</span>,
+};
+
+(<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
   <span class="hljs-comment">// initialize SDK</span>
-  <span class="hljs-keyword">const</span> wXTZ = <span class="hljs-keyword">await</span> WXTZSDK.at(<span class="hljs-string">&#x27;KT1coreAddress&#x27;</span>, wXTZConfig);
+  <span class="hljs-keyword">const</span> wXTZ = <span class="hljs-keyword">await</span> WXTZSDK.at(<span class="hljs-string">&#x27;KT1VMHXqjocCDZJ9cVwbtM1saLmXjyxwPb2h&#x27;</span>, wXTZConfig);
   <span class="hljs-comment">// perform optional check</span>
   <span class="hljs-keyword">const</span> isValidContractCode = <span class="hljs-keyword">await</span> wXTZ.checkContractCodeIntegrity();
 
-  <span class="hljs-keyword">const</span> createOvenContractMethod = <span class="hljs-keyword">await</span> wXTZ.createOven(<span class="hljs-string">&#x27;tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6&#x27;</span>);
+  <span class="hljs-keyword">const</span> createOvenContractMethod = <span class="hljs-keyword">await</span> wXTZ.createOven(<span class="hljs-string">&#x27;tz1QFeixME3pnRFwGFArJ5EFEc7uPjqxDNHY&#x27;</span>);
   <span class="hljs-keyword">const</span> transactionOperation = <span class="hljs-keyword">await</span> createOvenContractMethod.send();
   <span class="hljs-keyword">await</span> transactionOperation.confirmation(<span class="hljs-number">1</span>);
 
@@ -144,33 +116,104 @@ Tezos.setProvider({
   <span class="hljs-keyword">const</span> isValid = <span class="hljs-keyword">await</span> wXTZOven.checkContractCodeIntegrity();
 
   <span class="hljs-comment">// deposit</span>
-  <span class="hljs-keyword">const</span> depositTxOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.deposit()).send({
+  <span class="hljs-keyword">const</span> depositOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.deposit()).send({
     <span class="hljs-attr">amount</span>: <span class="hljs-number">100</span>,
     <span class="hljs-attr">mutez</span>: <span class="hljs-literal">true</span>,
   });
-  <span class="hljs-keyword">await</span> depositTxOperation.confirmation(<span class="hljs-number">1</span>);
+  <span class="hljs-keyword">await</span> depositOperation.confirmation(<span class="hljs-number">1</span>);
 
   <span class="hljs-comment">// withdraw</span>
-  <span class="hljs-keyword">const</span> withdrawTxOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.withdraw(<span class="hljs-number">100</span>)).send();
-  <span class="hljs-keyword">await</span> withdrawTxOperation.confirmation(<span class="hljs-number">1</span>);
+  <span class="hljs-keyword">const</span> withdrawOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.withdraw(<span class="hljs-number">100</span>)).send();
+  <span class="hljs-keyword">await</span> withdrawOperation.confirmation(<span class="hljs-number">1</span>);
 
   <span class="hljs-comment">// set delegate</span>
-  <span class="hljs-keyword">const</span> setDelegateTxOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.setDelegate(<span class="hljs-string">&#x27;tz1...&#x27;</span>)).send();
-  <span class="hljs-keyword">await</span> setDelegateTxOperation.confirmation(<span class="hljs-number">1</span>);
+  <span class="hljs-keyword">const</span> setDelegateOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.setDelegate(<span class="hljs-string">&#x27;tz1...&#x27;</span>)).send();
+  <span class="hljs-keyword">await</span> setDelegateOperation.confirmation(<span class="hljs-number">1</span>);
 
   <span class="hljs-comment">// remove delegate</span>
-  <span class="hljs-keyword">const</span> removeDelegateTxOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.setDelegate(<span class="hljs-literal">null</span>)).send();
-  <span class="hljs-keyword">await</span> removeDelegateTxOperation.confirmation(<span class="hljs-number">1</span>);
+  <span class="hljs-keyword">const</span> removeDelegateOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.setDelegate(<span class="hljs-literal">null</span>)).send();
+  <span class="hljs-keyword">await</span> removeDelegateOperation.confirmation(<span class="hljs-number">1</span>);
 
   <span class="hljs-comment">// get delegate</span>
-  <span class="hljs-keyword">const</span> delegate = <span class="hljs-keyword">await</span> wXTZOven.getDelegate();
+  <span class="hljs-keyword">const</span> delegateAddress = <span class="hljs-keyword">await</span> wXTZOven.getDelegate();
 
   <span class="hljs-comment">// get core address</span>
   <span class="hljs-keyword">const</span> coreAddress = <span class="hljs-keyword">await</span> wXTZOven.getCoreAddress();
 
   <span class="hljs-comment">// get oven details for date/time of origination and last action, block height of origination</span>
   <span class="hljs-keyword">const</span> ovenDetails = <span class="hljs-keyword">await</span> wXTZOven.getDetails();
-})();</code></pre>
+})();
+</code></pre>
+				<a href="#javascript" id="javascript" style="color: inherit; text-decoration: none;">
+					<h3>JavaScript</h3>
+				</a>
+				<details><summary>Example</summary>
+					<p>
+						<!-- embedme examples/typescript/example.js -->
+						<pre><code class="language-js"><span class="hljs-keyword">const</span> { WXTZSDK, NetworkType } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;@stove-labs/wxtz-sdk&#x27;</span>);
+<span class="hljs-keyword">const</span> { InMemorySigner } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;@taquito/signer&#x27;</span>);
+<span class="hljs-keyword">const</span> { TezosToolkit } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;@taquito/taquito&#x27;</span>);
+
+<span class="hljs-keyword">const</span> Tezos = <span class="hljs-keyword">new</span> TezosToolkit(<span class="hljs-string">&#x27;https://testnet-tezos.giganode.io&#x27;</span>);
+Tezos.setProvider({
+  <span class="hljs-attr">signer</span>: <span class="hljs-keyword">new</span> InMemorySigner(
+    <span class="hljs-string">&#x27;edskSAVepaB1qJvJBrR9WK3X6JQneSGq2wf4jF4czWjMF3LyqtyELhGxqmx9gBADquKHr12uYpsDJA1H1RQJNBUUjkefytWs6e&#x27;</span>
+  ),
+});
+
+<span class="hljs-keyword">const</span> wXTZConfig = {
+  <span class="hljs-attr">tezos</span>: Tezos,
+  <span class="hljs-attr">network</span>: NetworkType.delphinet,
+  <span class="hljs-attr">indexerUrl</span>: <span class="hljs-string">&#x27;https://you.better-call.dev&#x27;</span>,
+};
+
+(<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// initialize SDK</span>
+  <span class="hljs-keyword">const</span> wXTZ = <span class="hljs-keyword">await</span> WXTZSDK.at(<span class="hljs-string">&#x27;KT1VMHXqjocCDZJ9cVwbtM1saLmXjyxwPb2h&#x27;</span>, wXTZConfig);
+  <span class="hljs-comment">// perform optional check</span>
+  <span class="hljs-keyword">const</span> isValidContractCode = <span class="hljs-keyword">await</span> wXTZ.checkContractCodeIntegrity();
+
+  <span class="hljs-keyword">const</span> createOvenContractMethod = <span class="hljs-keyword">await</span> wXTZ.createOven(<span class="hljs-string">&#x27;tz1QFeixME3pnRFwGFArJ5EFEc7uPjqxDNHY&#x27;</span>);
+  <span class="hljs-keyword">const</span> transactionOperation = <span class="hljs-keyword">await</span> createOvenContractMethod.send();
+  <span class="hljs-keyword">await</span> transactionOperation.confirmation(<span class="hljs-number">1</span>);
+
+  <span class="hljs-comment">// interact with oven</span>
+  <span class="hljs-keyword">const</span> wXTZOven = <span class="hljs-keyword">await</span> wXTZ.oven(<span class="hljs-string">&#x27;KT1ovenAddress&#x27;</span>);
+  <span class="hljs-keyword">await</span> wXTZOven.initialize();
+  <span class="hljs-comment">// perform optional check</span>
+  <span class="hljs-keyword">const</span> isValid = <span class="hljs-keyword">await</span> wXTZOven.checkContractCodeIntegrity();
+
+  <span class="hljs-comment">// deposit</span>
+  <span class="hljs-keyword">const</span> depositOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.deposit()).send({
+    <span class="hljs-attr">amount</span>: <span class="hljs-number">100</span>,
+    <span class="hljs-attr">mutez</span>: <span class="hljs-literal">true</span>,
+  });
+  <span class="hljs-keyword">await</span> depositOperation.confirmation(<span class="hljs-number">1</span>);
+
+  <span class="hljs-comment">// withdraw</span>
+  <span class="hljs-keyword">const</span> withdrawOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.withdraw(<span class="hljs-number">100</span>)).send();
+  <span class="hljs-keyword">await</span> withdrawOperation.confirmation(<span class="hljs-number">1</span>);
+
+  <span class="hljs-comment">// set delegate</span>
+  <span class="hljs-keyword">const</span> setDelegateOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.setDelegate(<span class="hljs-string">&#x27;tz1...&#x27;</span>)).send();
+  <span class="hljs-keyword">await</span> setDelegateOperation.confirmation(<span class="hljs-number">1</span>);
+
+  <span class="hljs-comment">// remove delegate</span>
+  <span class="hljs-keyword">const</span> removeDelegateOperation = <span class="hljs-keyword">await</span> (<span class="hljs-keyword">await</span> wXTZOven.setDelegate(<span class="hljs-literal">null</span>)).send();
+  <span class="hljs-keyword">await</span> removeDelegateOperation.confirmation(<span class="hljs-number">1</span>);
+
+  <span class="hljs-comment">// get delegate</span>
+  <span class="hljs-keyword">const</span> delegateAddress = <span class="hljs-keyword">await</span> wXTZOven.getDelegate();
+
+  <span class="hljs-comment">// get core address</span>
+  <span class="hljs-keyword">const</span> coreAddress = <span class="hljs-keyword">await</span> wXTZOven.getCoreAddress();
+
+  <span class="hljs-comment">// get oven details for date/time of origination and last action, block height of origination</span>
+  <span class="hljs-keyword">const</span> ovenDetails = <span class="hljs-keyword">await</span> wXTZOven.getDetails();
+})();
+</code></pre>
+					</p>
+				</details>
 				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
 					<h2>API Reference</h2>
 				</a>
