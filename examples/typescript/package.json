@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "wxtz-sdk": "file:../.."
+    "@stove-labs/wxtz-sdk": "file:../.."
   }
 }
