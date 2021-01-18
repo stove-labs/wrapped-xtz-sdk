@@ -1,72 +1,47 @@
+[![npm version](https://badge.fury.io/js/%40stove-labs%2Fwxtz-sdk.svg)](https://badge.fury.io/js/%40stove-labs%2Fwxtz-sdk)
+![build](https://github.com/stove-labs/wrapped-xtz-sdk/workflows/build/badge.svg)
 ![Delphinet](https://github.com/stove-labs/wrapped-xtz-sdk/workflows/Delphinet/badge.svg)
 [![Made with TypeScript](https://img.shields.io/badge/made_with-TypeScript-blue.svg)](https://www.typescriptlang.org)
+[![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 # Wrapped-XTZ SDK
 
 This SDK for TypeScript and JavaScript enables you to interact with Tezos smart contracts of the [Wrapped-XTZ](https://github.com/stakerdao/wrapped-xtz) project by StakerDAO.
 
-> 🚧 This software is still under development and not released. 🚧
+# Quickstart 🪄
 
 ```sh
-git clone https://github.com/stove-labs/wrapped-xtz-sdk folder-name
-cd folder-name
-npm install
-npm run build
+npm install @stove-labs/wxtz-sdk
 ```
-# Quickstart 🪄
-## Import
-### TypeScript
-
-<!-- embedme examples/typescript/example.ts#L1-L14 -->
-```ts
-import { WXTZSDK, NetworkType } from 'wxtz-sdk';
-import { InMemorySigner } from '@taquito/signer';
-import { TezosToolkit } from '@taquito/taquito';
-
-const Tezos = new TezosToolkit('tezos rpc url');
-Tezos.setProvider({
-  signer: new InMemorySigner('signer secret key'),
-});
-
-const wXTZConfig = {
-  tezos: Tezos,
-  network: NetworkType.delphinet,
-  indexerUrl: 'https://you.better-call.dev',
-};
-```
-
-### JavaScript
-
-<!-- embedme examples/typescript/example.js#L1-L14 -->
-```js
-const { WXTZSDK, NetworkType } = require('wxtz-sdk');
-const { InMemorySigner } = require('@taquito/signer');
-const { TezosToolkit } = require('@taquito/taquito');
-
-const Tezos = new TezosToolkit('tezos rpc url');
-Tezos.setProvider({
-  signer: new InMemorySigner('signer secret key'),
-});
-
-const wXTZConfig = {
-  tezos: Tezos,
-  network: NetworkType.delphinet,
-  indexerUrl: 'https://you.better-call.dev',
-};
-```
-
 ## Usage 🕹
 ### Typescript
 
-<!-- embedme examples/typescript/example.ts#L16-L59 -->
+<!-- embedme examples/typescript/example.ts -->
 ```ts
+import { WXTZSDK, NetworkType } from '@stove-labs/wxtz-sdk';
+import { InMemorySigner } from '@taquito/signer';
+import { TezosToolkit } from '@taquito/taquito';
+
+const Tezos = new TezosToolkit('https://testnet-tezos.giganode.io');
+Tezos.setProvider({
+  signer: new InMemorySigner(
+    'edskSAVepaB1qJvJBrR9WK3X6JQneSGq2wf4jF4czWjMF3LyqtyELhGxqmx9gBADquKHr12uYpsDJA1H1RQJNBUUjkefytWs6e'
+  ),
+});
+
+const wXTZConfig = {
+  tezos: Tezos,
+  network: NetworkType.delphinet,
+  indexerUrl: 'https://you.better-call.dev',
+};
+
 (async function () {
   // initialize SDK
-  const wXTZ = await WXTZSDK.at('KT1coreAddress', wXTZConfig);
+  const wXTZ = await WXTZSDK.at('KT1VMHXqjocCDZJ9cVwbtM1saLmXjyxwPb2h', wXTZConfig);
   // perform optional check
   const isValidContractCode = await wXTZ.checkContractCodeIntegrity();
 
-  const createOvenContractMethod = await wXTZ.createOven('tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6');
+  const createOvenContractMethod = await wXTZ.createOven('tz1QFeixME3pnRFwGFArJ5EFEc7uPjqxDNHY');
   const transactionOperation = await createOvenContractMethod.send();
   await transactionOperation.confirmation(1);
 
@@ -77,26 +52,26 @@ const wXTZConfig = {
   const isValid = await wXTZOven.checkContractCodeIntegrity();
 
   // deposit
-  const depositTxOperation = await (await wXTZOven.deposit()).send({
+  const depositOperation = await (await wXTZOven.deposit()).send({
     amount: 100,
     mutez: true,
   });
-  await depositTxOperation.confirmation(1);
+  await depositOperation.confirmation(1);
 
   // withdraw
-  const withdrawTxOperation = await (await wXTZOven.withdraw(100)).send();
-  await withdrawTxOperation.confirmation(1);
+  const withdrawOperation = await (await wXTZOven.withdraw(100)).send();
+  await withdrawOperation.confirmation(1);
 
   // set delegate
-  const setDelegateTxOperation = await (await wXTZOven.setDelegate('tz1...')).send();
-  await setDelegateTxOperation.confirmation(1);
+  const setDelegateOperation = await (await wXTZOven.setDelegate('tz1...')).send();
+  await setDelegateOperation.confirmation(1);
 
   // remove delegate
-  const removeDelegateTxOperation = await (await wXTZOven.setDelegate(null)).send();
-  await removeDelegateTxOperation.confirmation(1);
+  const removeDelegateOperation = await (await wXTZOven.setDelegate(null)).send();
+  await removeDelegateOperation.confirmation(1);
 
   // get delegate
-  const delegate = await wXTZOven.getDelegate();
+  const delegateAddress = await wXTZOven.getDelegate();
 
   // get core address
   const coreAddress = await wXTZOven.getCoreAddress();
@@ -104,7 +79,84 @@ const wXTZConfig = {
   // get oven details for date/time of origination and last action, block height of origination
   const ovenDetails = await wXTZOven.getDetails();
 })();
+
 ```
+
+### JavaScript
+
+<details><summary>Example</summary>
+<p>
+
+<!-- embedme examples/typescript/example.js -->
+```js
+const { WXTZSDK, NetworkType } = require('@stove-labs/wxtz-sdk');
+const { InMemorySigner } = require('@taquito/signer');
+const { TezosToolkit } = require('@taquito/taquito');
+
+const Tezos = new TezosToolkit('https://testnet-tezos.giganode.io');
+Tezos.setProvider({
+  signer: new InMemorySigner(
+    'edskSAVepaB1qJvJBrR9WK3X6JQneSGq2wf4jF4czWjMF3LyqtyELhGxqmx9gBADquKHr12uYpsDJA1H1RQJNBUUjkefytWs6e'
+  ),
+});
+
+const wXTZConfig = {
+  tezos: Tezos,
+  network: NetworkType.delphinet,
+  indexerUrl: 'https://you.better-call.dev',
+};
+
+(async function () {
+  // initialize SDK
+  const wXTZ = await WXTZSDK.at('KT1VMHXqjocCDZJ9cVwbtM1saLmXjyxwPb2h', wXTZConfig);
+  // perform optional check
+  const isValidContractCode = await wXTZ.checkContractCodeIntegrity();
+
+  const createOvenContractMethod = await wXTZ.createOven('tz1QFeixME3pnRFwGFArJ5EFEc7uPjqxDNHY');
+  const transactionOperation = await createOvenContractMethod.send();
+  await transactionOperation.confirmation(1);
+
+  // interact with oven
+  const wXTZOven = await wXTZ.oven('KT1ovenAddress');
+  await wXTZOven.initialize();
+  // perform optional check
+  const isValid = await wXTZOven.checkContractCodeIntegrity();
+
+  // deposit
+  const depositOperation = await (await wXTZOven.deposit()).send({
+    amount: 100,
+    mutez: true,
+  });
+  await depositOperation.confirmation(1);
+
+  // withdraw
+  const withdrawOperation = await (await wXTZOven.withdraw(100)).send();
+  await withdrawOperation.confirmation(1);
+
+  // set delegate
+  const setDelegateOperation = await (await wXTZOven.setDelegate('tz1...')).send();
+  await setDelegateOperation.confirmation(1);
+
+  // remove delegate
+  const removeDelegateOperation = await (await wXTZOven.setDelegate(null)).send();
+  await removeDelegateOperation.confirmation(1);
+
+  // get delegate
+  const delegateAddress = await wXTZOven.getDelegate();
+
+  // get core address
+  const coreAddress = await wXTZOven.getCoreAddress();
+
+  // get oven details for date/time of origination and last action, block height of origination
+  const ovenDetails = await wXTZOven.getDetails();
+})();
+
+```
+
+</p>
+</details>
+
+
 ## API Reference
 
 Checkout the complete TypeDoc [API reference](https://stove-labs.github.io/wrapped-xtz-sdk).

@@ -1,10 +1,12 @@
-const { WXTZSDK, NetworkType } = require('wxtz-sdk');
+const { WXTZSDK, NetworkType } = require('@stove-labs/wxtz-sdk');
 const { InMemorySigner } = require('@taquito/signer');
 const { TezosToolkit } = require('@taquito/taquito');
 
-const Tezos = new TezosToolkit('tezos rpc url');
+const Tezos = new TezosToolkit('https://testnet-tezos.giganode.io');
 Tezos.setProvider({
-  signer: new InMemorySigner('signer secret key'),
+  signer: new InMemorySigner(
+    'edskSAVepaB1qJvJBrR9WK3X6JQneSGq2wf4jF4czWjMF3LyqtyELhGxqmx9gBADquKHr12uYpsDJA1H1RQJNBUUjkefytWs6e'
+  ),
 });
 
 const wXTZConfig = {
@@ -15,11 +17,11 @@ const wXTZConfig = {
 
 (async function () {
   // initialize SDK
-  const wXTZ = await WXTZSDK.at('KT1coreAddress', wXTZConfig);
+  const wXTZ = await WXTZSDK.at('KT1VMHXqjocCDZJ9cVwbtM1saLmXjyxwPb2h', wXTZConfig);
   // perform optional check
   const isValidContractCode = await wXTZ.checkContractCodeIntegrity();
 
-  const createOvenContractMethod = await wXTZ.createOven('tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6');
+  const createOvenContractMethod = await wXTZ.createOven('tz1QFeixME3pnRFwGFArJ5EFEc7uPjqxDNHY');
   const transactionOperation = await createOvenContractMethod.send();
   await transactionOperation.confirmation(1);
 
@@ -30,26 +32,26 @@ const wXTZConfig = {
   const isValid = await wXTZOven.checkContractCodeIntegrity();
 
   // deposit
-  const depositTxOperation = await (await wXTZOven.deposit()).send({
+  const depositOperation = await (await wXTZOven.deposit()).send({
     amount: 100,
     mutez: true,
   });
-  await depositTxOperation.confirmation(1);
+  await depositOperation.confirmation(1);
 
   // withdraw
-  const withdrawTxOperation = await (await wXTZOven.withdraw(100)).send();
-  await withdrawTxOperation.confirmation(1);
+  const withdrawOperation = await (await wXTZOven.withdraw(100)).send();
+  await withdrawOperation.confirmation(1);
 
   // set delegate
-  const setDelegateTxOperation = await (await wXTZOven.setDelegate('tz1...')).send();
-  await setDelegateTxOperation.confirmation(1);
+  const setDelegateOperation = await (await wXTZOven.setDelegate('tz1...')).send();
+  await setDelegateOperation.confirmation(1);
 
   // remove delegate
-  const removeDelegateTxOperation = await (await wXTZOven.setDelegate(null)).send();
-  await removeDelegateTxOperation.confirmation(1);
+  const removeDelegateOperation = await (await wXTZOven.setDelegate(null)).send();
+  await removeDelegateOperation.confirmation(1);
 
   // get delegate
-  const delegate = await wXTZOven.getDelegate();
+  const delegateAddress = await wXTZOven.getDelegate();
 
   // get core address
   const coreAddress = await wXTZOven.getCoreAddress();
