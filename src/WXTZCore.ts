@@ -30,10 +30,6 @@ export class WXTZCore extends WXTZBase<WXTZCore> {
     this.BCDApi = new BCDApi(wXTZConfig.indexerUrl, wXTZConfig.network);
   }
 
-  public getCoreAddress(): address {
-    return this.instance.address;
-  }
-
   public async checkContractCodeIntegrity(): Promise<boolean> {
     const coreIntegrity = await super.checkContractCodeIntegrity();
     const lambdaCreateOvenIntegrity = await this.checkCreateOvenCodeIntegrity();
@@ -82,7 +78,7 @@ export class WXTZCore extends WXTZBase<WXTZCore> {
   }
 
   private async checkCreateOvenCodeIntegrity(): Promise<boolean> {
-    const checksum = this.deployment[ContractType.core].checksum;
+    const checksum = this.deployment[ContractType.lambdaCreateOven].checksum;
     const packedCreateOvenBytes = await this.getPackedLambda('entrypoint/createOven');
     return await checkIntegrity(checksum, packedCreateOvenBytes);
   }
