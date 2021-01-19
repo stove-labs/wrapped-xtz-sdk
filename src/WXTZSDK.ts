@@ -32,7 +32,7 @@ export class WXTZSDK extends WXTZCore {
     return wxtz;
   }
 
-  public async checkContractCodeIntegrity(): Promise<boolean> {
+  public async checkCodeIntegrity(): Promise<boolean> {
     const coreValid = await this.checkContractCodeIntegrity();
     const tokenValid = await this.token.checkContractCodeIntegrity();
     return coreValid && tokenValid;

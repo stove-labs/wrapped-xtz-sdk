@@ -11,7 +11,7 @@ export function setup() {
   const wXTZConfig = {
     tezos: Tezos,
     network: NetworkType.delphinet,
-    indexerUrl: 'https://you.better-call.dev',
+    indexerUrl: testConfig.indexerUrl,
   };
 
   return wXTZConfig;

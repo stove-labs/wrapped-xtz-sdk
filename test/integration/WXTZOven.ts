@@ -1,7 +1,6 @@
 import test from '../config';
 import { WXTZOven } from '../../src/index';
 import { expect } from 'chai';
-import deployments from '../../src/deployments.json';
 import { setup } from './before';
 import { wXTZConfig } from '../../src/types';
 
@@ -16,13 +15,21 @@ describe('WXTZOven.ts', () => {
     let wXTZOven: WXTZOven;
 
     beforeEach(() => {
-      wXTZOven = new WXTZOven(test.ovenWithoutDelegate, wXTZConfig, deployments.delphinet);
+      wXTZOven = new WXTZOven(test.ovenWithoutDelegate, wXTZConfig, test.deployment);
     });
 
     it('can instantiate the oven class', () => {
-      const wXTZOvenClass = new WXTZOven(test.ovenWithoutDelegate, wXTZConfig, deployments.delphinet);
+      const wXTZOvenClass = new WXTZOven(test.ovenWithoutDelegate, wXTZConfig, test.deployment);
 
       expect(wXTZOvenClass).to.be.instanceOf(WXTZOven);
+    });
+
+    it('can check whether oven address belongs to known deployment', () => {
+      const wXTZOvenWithDelegate = new WXTZOven(test.ovenWithDelegate, wXTZConfig, test.deployment);
+
+      const isKnownDeployment = wXTZOvenWithDelegate.checkAddress();
+
+      expect(isKnownDeployment).to.be.true;
     });
 
     it('initializes with oven address', async () => {
@@ -33,7 +40,7 @@ describe('WXTZOven.ts', () => {
 
     describe('after initializing oven', () => {
       beforeEach(async () => {
-        // making sure that oven is initialized when running tests below separately
+        // making sure that oven class is initialized when running tests below separately
         await wXTZOven.initialize();
       });
 
@@ -60,6 +67,14 @@ describe('WXTZOven.ts', () => {
         const delegateFetched = await wXTZOven.getDelegate();
 
         expect(delegateFetched).to.be.null;
+      });
+
+      it('can set delegate for oven', async () => {
+        const operation = await (await wXTZOven.setDelegate(test.delegate.pkh)).send();
+
+        await operation.confirmation(1);
+        const delegateFetched = await wXTZOven.getDelegate();
+        expect(delegateFetched).to.equal(test.delegate.pkh);
       });
 
       it.skip('can retrieve transaction history', async () => {});
@@ -89,7 +104,7 @@ describe('WXTZOven.ts', () => {
       let wXTZOven: WXTZOven;
 
       beforeEach(async () => {
-        wXTZOven = new WXTZOven(test.ovenWithDelegate, wXTZConfig, deployments.delphinet);
+        wXTZOven = new WXTZOven(test.ovenWithDelegate, wXTZConfig, test.deployment);
         await wXTZOven.initialize();
       });
 
@@ -97,6 +112,14 @@ describe('WXTZOven.ts', () => {
         const delegateFetched = await wXTZOven.getDelegate();
 
         expect(delegateFetched).to.equal(test.delegate.pkh);
+      });
+
+      it('can remove delegate', async () => {
+        const operation = await (await wXTZOven.removeDelegate()).send();
+
+        await operation.confirmation(1);
+        const delegateFetched = await wXTZOven.getDelegate();
+        expect(delegateFetched).to.be.null;
       });
     });
   });

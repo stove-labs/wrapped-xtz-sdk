@@ -1,16 +1,25 @@
-const { bob, carol } = require('../scripts/tools/sandbox/scripts/sandbox/accounts');
+const { bob, carol, dave } = require('../scripts/tools/sandbox/scripts/sandbox/accounts');
 const ovenWithDelegate = require('../scripts/tools/sandbox/deployments/ovenWithDelegate');
 const ovenWithoutDelegate = require('../scripts/tools/sandbox/deployments/ovenWithoutDelegate');
 const core = require('../scripts/tools/sandbox/deployments/core');
 const token = require('../scripts/tools/sandbox/deployments/tzip-7');
+const defaultDeployments = require('../src/deployments.json');
+
+const deployment = defaultDeployments.localhost;
+deployment.core.address = core;
+deployment.token.address = token;
+deployment.oven.address = ovenWithDelegate;
 
 export default {
   ovenWithDelegate,
   ovenWithoutDelegate,
+  deployment,
   core,
+  dave,
   ovenOwner: carol,
   delegate: bob,
   rpc: 'http://localhost:8732',
+  indexerUrl: 'http://localhost:8000',
   amount: 100,
   token,
   ovenContractCodeMicheline: [

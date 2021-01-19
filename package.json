@@ -17,7 +17,7 @@
     "fix:lint": "eslint src --ext .ts --fix",
     "sandbox:start": "npm run tools:start sandbox",
     "test:migrate": "npm run tools:migrate sandbox",
-    "test": "mocha -r ts-node/register './test/**/*.ts'",
+    "test": "nyc --silent mocha -r ts-node/register './test/**/*.ts'",
     "test:lint": "eslint src --ext .ts",
     "test:prettier": "prettier \"src/**/*.ts\" --list-different",
     "test:spelling": "cspell \"{README.md,.github/*.md,src/**/*.ts}\"",
@@ -42,7 +42,8 @@
     "version": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && npm i",
     "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish",
-    "update-readme-code-snippets": "npx embedme README.md"
+    "update-readme-code-snippets": "npx embedme README.md",
+    "coverage": "codecov"
   },
   "engines": {
     "node": ">=10"
@@ -52,8 +53,7 @@
     "@taquito/signer": "^7.1.0-beta.0",
     "@taquito/taquito": "^7.1.0-beta.0",
     "axios": "^0.21.1",
-    "conseiljs": "^5.0.6-1",
-    "runtypes": "^5.0.1"
+    "conseiljs": "^5.0.6-1"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
@@ -65,7 +65,7 @@
     "@typescript-eslint/parser": "^4.0.1",
     "ava": "^3.12.1",
     "chai": "^4.2.0",
-    "codecov": "^3.5.0",
+    "codecov": "^3.8.1",
     "cspell": "^4.1.0",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.8.0",
@@ -117,7 +117,9 @@
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
     "exclude": [
-      "**/*.spec.js"
+      "**/*.spec.js",
+      "test/**/*",
+      "scripts"
     ]
   },
   "author": "istvan.deak@stove-labs.com"
