@@ -117,7 +117,9 @@
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
     "exclude": [
-      "**/*.spec.js"
+      "**/*.spec.js",
+      "test/**/*",
+      "scripts"
     ]
   },
   "author": "istvan.deak@stove-labs.com"

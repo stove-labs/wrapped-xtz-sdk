@@ -1,6 +1,7 @@
 [![npm version](https://badge.fury.io/js/%40stove-labs%2Fwxtz-sdk.svg)](https://badge.fury.io/js/%40stove-labs%2Fwxtz-sdk)
 ![build](https://github.com/stove-labs/wrapped-xtz-sdk/workflows/build/badge.svg)
 ![Delphinet](https://github.com/stove-labs/wrapped-xtz-sdk/workflows/Delphinet/badge.svg)
+[![codecov](https://codecov.io/gh/stove-labs/wrapped-xtz-sdk/branch/dev/graph/badge.svg?token=V62SO4RIFD)](https://codecov.io/gh/stove-labs/wrapped-xtz-sdk)
 [![Made with TypeScript](https://img.shields.io/badge/made_with-TypeScript-blue.svg)](https://www.typescriptlang.org)
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -157,7 +158,7 @@ const wXTZConfig = {
 </details>
 
 
-## API Reference
+## API Reference 📚
 
 Checkout the complete TypeDoc [API reference](https://stove-labs.github.io/wrapped-xtz-sdk).
 ## Tests 🧪
