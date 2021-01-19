@@ -26,3 +26,5 @@ jobs:
           time: '20s'
       - run: npm run test:migrate
       - run: npm run test
+      - run: npm run cov:html
+      - run: npm run coverage
