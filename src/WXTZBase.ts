@@ -23,7 +23,7 @@ export abstract class WXTZBase<T> {
   }
 
   public async initialize(): Promise<WXTZBase<T>> {
-    this.instance = await this.Tezos.contract.at(this.address);
+    this.instance = await this.Tezos.wallet.at(this.address);
     return this;
   }
 
